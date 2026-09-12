@@ -2279,10 +2279,204 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAboutDialog() {
 
-        val message =
-            getString(
-                R.string.about_message
+        val container =
+            LinearLayout(this).apply {
+
+                orientation =
+                    LinearLayout.VERTICAL
+
+                setPadding(
+                    32,
+                    8,
+                    32,
+                    8
+                )
+            }
+
+        val description =
+            TextView(this).apply {
+
+                text =
+                    getString(
+                        R.string.about_description
+                    )
+
+                textSize =
+                    16f
+            }
+
+        container.addView(
+            description,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
             )
+        )
+
+        val createdByLabel =
+            TextView(this).apply {
+
+                text =
+                    getString(
+                        R.string.created_by
+                    )
+
+                textSize =
+                    13f
+
+                setTypeface(
+                    null,
+                    Typeface.BOLD
+                )
+
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        topMargin =
+                            24
+                    }
+            }
+
+        container.addView(
+            createdByLabel
+        )
+
+        val creatorLink =
+            TextView(this).apply {
+
+                text =
+                    getString(
+                        R.string.created_by_name
+                    )
+
+                textSize =
+                    16f
+
+                isClickable =
+                    true
+
+                isFocusable =
+                    true
+
+                setOnClickListener {
+
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            "https://github.com/Dark-Witcher"
+                                .toUri()
+                        )
+                    )
+                }
+            }
+
+        container.addView(
+            creatorLink,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
+        val attributionText =
+            getString(
+                R.string.about_attribution
+            )
+
+        val attributionLinkText =
+            getString(
+                R.string.about_attribution_link_text
+            )
+
+        val attributionStart =
+            attributionText.indexOf(
+                attributionLinkText
+            )
+
+        val attributionEnd =
+            attributionStart +
+                    attributionLinkText.length
+
+        val attribution =
+            TextView(this).apply {
+
+                textSize =
+                    13f
+
+                movementMethod =
+                    android.text.method.LinkMovementMethod.getInstance()
+
+                highlightColor =
+                    Color.TRANSPARENT
+
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        topMargin =
+                            24
+                    }
+            }
+
+        val attributionColor =
+            attribution.currentTextColor
+
+        val attributionSpannable =
+            android.text.SpannableString(
+                attributionText
+            )
+
+        if (
+            attributionStart >= 0
+        ) {
+
+            attributionSpannable.setSpan(
+                object :
+                    android.text.style.ClickableSpan() {
+
+                    override fun onClick(
+                        widget: View
+                    ) {
+
+                        startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                "https://github.com/Prayag2/kde_modernclock"
+                                    .toUri()
+                            )
+                        )
+                    }
+
+                    override fun updateDrawState(
+                        drawState:
+                        android.text.TextPaint
+                    ) {
+
+                        drawState.color =
+                            attributionColor
+
+                        drawState.isUnderlineText =
+                            false
+                    }
+                },
+                attributionStart,
+                attributionEnd,
+                android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        attribution.text =
+            attributionSpannable
+
+        container.addView(
+            attribution
+        )
 
         val dialog =
             AlertDialog.Builder(this)
@@ -2291,29 +2485,36 @@ class MainActivity : AppCompatActivity() {
                         R.string.app_name
                     )
                 )
-                .setMessage(
-                    message
+                .setView(
+                    container
+                )
+                .setNeutralButton(
+                    R.string.github,
+                    null
                 )
                 .setPositiveButton(
-                    R.string.github
-                ) { _, _ ->
-
-                    val intent =
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            "https://github.com/Prayag2/kde_modernclock"
-                                .toUri()
-                        )
-
-                    startActivity(
-                        intent
-                    )
-                }
-                .setNegativeButton(
                     R.string.close,
                     null
                 )
                 .create()
+
+        dialog.setOnShowListener {
+
+            dialog
+                .getButton(
+                    AlertDialog.BUTTON_NEUTRAL
+                )
+                .setOnClickListener {
+
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            "https://github.com/Dark-Witcher/modern-clock-android"
+                                .toUri()
+                        )
+                    )
+                }
+        }
 
         dialog.show()
     }

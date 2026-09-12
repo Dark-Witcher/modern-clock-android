@@ -74,6 +74,30 @@ class ModernClockWidget : AppWidgetProvider() {
 
         /*
          * =====================================================
+         * TEXT SHADOW
+         * =====================================================
+         *
+         * The original KDE clock uses a subtle shadow so the
+         * white text remains readable over bright wallpapers.
+         *
+         * Shadow rendering is applied independently of the
+         * text layout and therefore does not affect sizing.
+         */
+
+        private const val SHADOW_RADIUS_DP =
+            2.5f
+
+        private const val SHADOW_OFFSET_X_DP =
+            0f
+
+        private const val SHADOW_OFFSET_Y_DP =
+            1.5f
+
+        private const val SHADOW_ALPHA =
+            180
+
+        /*
+         * =====================================================
          * LIVE SECOND UPDATES
          * =====================================================
          *
@@ -702,6 +726,56 @@ class ModernClockWidget : AppWidgetProvider() {
                         3f /
                                 19f
                 }
+
+            /*
+             * =================================================
+             * TEXT SHADOW
+             * =================================================
+             *
+             * Apply the same subtle shadow to all three text
+             * elements.
+             */
+
+            val shadowRadius =
+                SHADOW_RADIUS_DP *
+                        density
+
+            val shadowOffsetX =
+                SHADOW_OFFSET_X_DP *
+                        density
+
+            val shadowOffsetY =
+                SHADOW_OFFSET_Y_DP *
+                        density
+
+            val shadowColor =
+                Color.argb(
+                    SHADOW_ALPHA,
+                    0,
+                    0,
+                    0
+                )
+
+            dayPaint.setShadowLayer(
+                shadowRadius,
+                shadowOffsetX,
+                shadowOffsetY,
+                shadowColor
+            )
+
+            datePaint.setShadowLayer(
+                shadowRadius,
+                shadowOffsetX,
+                shadowOffsetY,
+                shadowColor
+            )
+
+            timePaint.setShadowLayer(
+                shadowRadius,
+                shadowOffsetX,
+                shadowOffsetY,
+                shadowColor
+            )
 
             /*
              * =================================================
