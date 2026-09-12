@@ -1,102 +1,81 @@
 # Modern Clock
 
-```{=html}
 <p align="center">
-```
-`<strong>`{=html}A minimalist Android clock widget inspired by KDE
-Modern Clock.`</strong>`{=html}
-```{=html}
+  <strong>A minimalist Android clock widget inspired by KDE Modern Clock.</strong>
 </p>
-```
-```{=html}
+
 <p align="center">
-```
-`<a href="https://github.com/Dark-Witcher/modern-clock-android/releases">`{=html}
-`<img src="https://img.shields.io/github/v/release/Dark-Witcher/modern-clock-android?style=for-the-badge&label=Latest%20Release" alt="Latest Release">`{=html}
-`</a>`{=html}
-`<a href="https://github.com/Dark-Witcher/modern-clock-android/blob/main/LICENSE">`{=html}
-`<img src="https://img.shields.io/github/license/Dark-Witcher/modern-clock-android?style=for-the-badge" alt="License">`{=html}
-`</a>`{=html}
-`<a href="https://github.com/Dark-Witcher/modern-clock-android">`{=html}
-`<img src="https://img.shields.io/github/stars/Dark-Witcher/modern-clock-android?style=for-the-badge" alt="GitHub Stars">`{=html}
-`</a>`{=html}
-```{=html}
+  <a href="https://github.com/Dark-Witcher/modern-clock-android/releases">
+    <img src="https://img.shields.io/github/v/release/Dark-Witcher/modern-clock-android?style=for-the-badge&label=Latest%20Release" alt="Latest Release">
+  </a>
+  <a href="https://github.com/Dark-Witcher/modern-clock-android/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/Dark-Witcher/modern-clock-android?style=for-the-badge" alt="License">
+  </a>
+  <a href="https://github.com/Dark-Witcher/modern-clock-android">
+    <img src="https://img.shields.io/github/stars/Dark-Witcher/modern-clock-android?style=for-the-badge" alt="GitHub Stars">
+  </a>
 </p>
-```
-Modern Clock is a clean, highly customizable Android home-screen clock
-widget based on the visual style of the **KDE Modern Clock** Plasma
-widget by Prayag2.
 
-It is designed to stay simple: a large stylized day, a date, and the
-current time --- with no unnecessary clutter.
+Modern Clock is a clean, customizable Android home-screen clock widget based on the visual style of **KDE Modern Clock** by Prayag2.
 
-------------------------------------------------------------------------
+It is designed to stay simple: a large stylized day, a date, and the current time — with no unnecessary clutter.
+
+---
 
 ## ✨ Features
 
--   🕐 **Minimalist home-screen clock widget**
--   📅 Customizable **date format**
--   ⏱️ Customizable **time format**
--   🔤 Stylized day display using the original Anurati typeface
--   🎨 Independent colors for:
-    -   Day
-    -   Date
-    -   Time
--   ↔️ Adjustable **day letter spacing**
--   👁️ Option to **show or hide the day**
--   🖤 **True-black OLED mode**
--   🌗 Light, dark, and system appearance settings
--   📐 Resizable Android widget
--   🌑 Subtle text shadows for readability over wallpapers
--   ⚡ Updates automatically at the appropriate time boundary
--   📱 Works without Google Play Services
+- 🕐 **Minimalist home-screen clock widget**
+- 📅 Customizable **date format**
+- ⏱️ Customizable **time format**
+- 🔤 Stylized day display using the Anurati typeface
+- 🎨 Independent colors for day, date, and time
+- ↔️ Adjustable **day letter spacing**
+- 👁️ Option to **show or hide the day**
+- 🖤 **True-black OLED mode**
+- 🌗 Light, dark, and system appearance settings
+- 📐 Resizable Android widget
+- 🌑 Subtle text shadows for readability over wallpapers
+- ⚡ Automatic clock updates
+- 📱 No Google Play Services required
 
 ### Tested on
 
 Modern Clock v1.0 has been tested successfully on:
 
--   Samsung Galaxy S9+ --- Android 14 / One UI 6
--   Samsung Galaxy S23 Ultra
--   Huawei MatePad 11 --- HarmonyOS 3
+- Samsung Galaxy S9+ — Android 14 / One UI 6
+- Samsung Galaxy S23 Ultra
+- Huawei MatePad 11 — HarmonyOS 3
 
-------------------------------------------------------------------------
+---
 
 ## 🎨 Design
 
-The Android version is inspired by the original **KDE Modern Clock**
-widget, which itself takes inspiration from the Rainmeter *Mond* skin.
+Modern Clock is inspired by the **KDE Modern Clock** Plasma widget, which itself takes inspiration from the Rainmeter *Mond* skin.
 
-The goal is to preserve the distinctive minimalist appearance while
-adapting the experience to Android's widget system.
+The Android version aims to preserve the distinctive minimalist appearance while adapting it to Android's home-screen widget system.
 
-The day uses **Anurati**, while the date and time use **Poppins**,
-following the original project's visual approach.
+The day uses **Anurati**, while the date and time use **Poppins**, following the visual approach of the original project.
 
-------------------------------------------------------------------------
+---
 
 ## 📲 Installation
 
-### From GitHub Releases
+1. Go to the [Releases](https://github.com/Dark-Witcher/modern-clock-android/releases) page.
+2. Download the latest `Modern-Clock-vX.X.apk`.
+3. Install the APK on your Android device.
+4. Open **Modern Clock** once after installation.
+5. Add **Modern Clock** from your home-screen widget picker.
+6. Configure the widget to your liking.
 
-1.  Download the latest `Modern-Clock-vX.X.apk` from the
-    [Releases](https://github.com/Dark-Witcher/modern-clock-android/releases)
-    page.
-2.  Install the APK on your Android device.
-3.  Open **Modern Clock** once after installation.
-4.  Add **Modern Clock** from your home-screen widget picker.
-5.  Configure the widget to your liking.
-
-Android may ask you to allow installation from the source you used to
-download the APK.
+Android may ask you to allow installation from the source you used to download the APK.
 
 ### Compatibility
 
--   **Minimum Android version:** Android 12 (API 31)
--   No Google Play Services required.
--   The widget is intended for Android-compatible launchers that support
-    third-party home-screen widgets.
+- **Minimum Android version:** Android 12 (API 31)
+- No Google Play Services required.
+- Requires an Android-compatible launcher with support for third-party home-screen widgets.
 
-------------------------------------------------------------------------
+---
 
 ## ⚙️ Configuration
 
@@ -104,18 +83,18 @@ Modern Clock provides settings for the main elements of the widget.
 
 ### Day
 
--   Show/hide the day
--   Adjust letter spacing
--   Choose the day color
+- Show or hide the day
+- Adjust letter spacing
+- Choose the day color
 
 ### Date
 
--   Set a custom date format
--   Choose the date color
+- Set a custom date format
+- Choose the date color
 
 Examples:
 
-``` text
+```text
 dd MMM yyyy
 dd MMMM yyyy
 MMM dd yyyy
@@ -124,12 +103,12 @@ yyyy-MM-dd
 
 ### Time
 
--   Set a custom time format
--   Choose the time color
+- Set a custom time format
+- Choose the time color
 
 Examples:
 
-``` text
+```text
 HH:mm
 hh:mm a
 HH:mm:ss
@@ -138,25 +117,23 @@ HH mm
 
 ### Colors
 
-Each element can be configured independently using the built-in color
-picker.
+Each element can be configured independently using the built-in color picker.
 
-You can enter colors directly as HEX values and view their RGB and HSL
-representations.
+You can enter colors directly as HEX values and view their RGB and HSL representations.
 
-------------------------------------------------------------------------
+---
 
 ## 🛠️ Building from Source
 
 ### Requirements
 
--   Android Studio
--   Android SDK with API 31 or newer
--   JDK compatible with the Android Gradle Plugin used by the project
+- Android Studio
+- Android SDK with API 31 or newer
+- JDK compatible with the Android Gradle Plugin used by the project
 
 Clone the repository:
 
-``` bash
+```bash
 git clone https://github.com/Dark-Witcher/modern-clock-android.git
 cd modern-clock-android
 ```
@@ -165,17 +142,17 @@ Open the project in Android Studio and allow Gradle to synchronize.
 
 To build a debug APK:
 
-``` bash
+```bash
 ./gradlew assembleDebug
 ```
 
 The APK will be generated under:
 
-``` text
+```text
 app/build/outputs/apk/debug/
 ```
 
-To create a release build, use:
+To create a release APK, use:
 
 **Android Studio → Build → Generate Signed App Bundle / APK**
 
@@ -183,33 +160,27 @@ A release build must be signed with your own keystore.
 
 > **Never commit your signing keystore or its passwords to Git.**
 
-------------------------------------------------------------------------
+---
 
-## 📦 Releases
+## 📦 v1.0
 
-Stable releases are published through GitHub Releases.
+The first stable release focuses on the core Modern Clock experience:
 
-The first stable release is:
+- Native Android home-screen widget
+- KDE-inspired visual design
+- Custom fonts
+- Date and time formatting
+- Per-element colors
+- Day visibility and letter spacing controls
+- Appearance settings
+- OLED mode
+- Widget resizing
+- Automatic clock updates
+- Subtle text shadows
 
-### v1.0
+Future releases may expand typography controls and improve font rendering and scaling.
 
-The v1.0 release focuses on the core Modern Clock experience:
-
--   Native Android home-screen widget
--   KDE-inspired visual design
--   Custom fonts
--   Date and time formatting
--   Per-element colors
--   Day visibility and letter spacing controls
--   Appearance settings
--   OLED mode
--   Widget resizing
--   Automatic clock updates
-
-Future releases may expand typography controls and improve font
-rendering and scaling.
-
-------------------------------------------------------------------------
+---
 
 ## 🗺️ Roadmap
 
@@ -217,23 +188,19 @@ rendering and scaling.
 
 Planned improvements include:
 
--   More precise font width controls
--   More precise font height/scale controls
--   Further investigation into rendering the day text directly rather
-    than as a bitmap
--   Additional typography customization
--   Continued compatibility testing across Android launchers and
-    manufacturers
+- More precise font width controls
+- More precise font height/scale controls
+- Further investigation into rendering the day text directly rather than as a bitmap
+- Additional typography customization
+- Continued compatibility testing across Android launchers and manufacturers
 
-The project intentionally keeps the interface focused rather than
-turning the widget into an overly complicated customization tool.
+The project intentionally keeps the interface focused rather than turning the widget into an overly complicated customization tool.
 
-------------------------------------------------------------------------
+---
 
 ## 🙏 Attribution
 
-Modern Clock is based on the visual concept and design of **KDE Modern
-Clock by Prayag2**:
+Modern Clock is based on the visual concept and design of **KDE Modern Clock by Prayag2**:
 
 https://github.com/Prayag2/kde_modernclock
 
@@ -245,21 +212,16 @@ Created by **Dark Witcher**:
 
 https://github.com/Dark-Witcher
 
-------------------------------------------------------------------------
+---
 
 ## 📄 License
 
-Modern Clock is free and open-source software licensed under the **GNU
-General Public License v3.0**.
+Modern Clock is free and open-source software licensed under the **GNU General Public License v3.0**.
 
 See [`LICENSE`](LICENSE) for the complete license text.
 
-------------------------------------------------------------------------
+---
 
-```{=html}
 <p align="center">
-```
-`<strong>`{=html}Simple. Minimal. Always visible.`</strong>`{=html}
-```{=html}
+  <strong>Simple. Minimal. Always visible.</strong>
 </p>
-```
