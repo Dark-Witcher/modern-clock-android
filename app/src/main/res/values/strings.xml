@@ -46,20 +46,13 @@
 
     <string name="colour_dialog_title">%1$s colour</string>
 
-    <string name="about_message">Modern Clock
-Version 1.0
+    <string name="about_description">A minimalist Android clock widget inspired by KDE Modern Clock.</string>
 
-A modern, minimalist clock widget for Android.
+    <string name="created_by">Created by</string>
+    <string name="created_by_name">Dark Witcher</string>
 
-Inspired by KDE Modern Clock by Prayag2.
-
-Original project:
-github.com/Prayag2/kde_modernclock
-
-Android implementation:
-Dark-Witcher
-
-License: GPL-3.0</string>
+    <string name="about_attribution">Based on KDE Modern Clock by Prayag2.\nLicensed under GPL-3.0.</string>
+    <string name="about_attribution_link_text">KDE Modern Clock by Prayag2</string>
 
     <string name="hex_colour_clipboard_label">HEX colour</string>
 
