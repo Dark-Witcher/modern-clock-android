@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Modern Clock</string>
+
+    <string name="widget_settings">Widget Settings</string>
+    <string name="preview">Preview</string>
+    <string name="settings">Settings</string>
+
+    <string name="day_settings">DAY</string>
+    <string name="show_day">Show day</string>
+
+    <string name="day_letter_spacing">DAY letter spacing</string>
+    <string name="day_letter_spacing_help">Original KDE default: 17</string>
+    <string name="day_letter_spacing_error">Enter a value from 0 to 100</string>
+
+    <string name="date_settings">DATE</string>
+    <string name="date_format">Date format</string>
+    <string name="date_format_help">Examples: dd MMM yyyy, dd MMMM yyyy, MMM dd yyyy, yyyy-MM-dd</string>
+
+    <string name="time_settings">TIME</string>
+    <string name="time_format">Time format</string>
+    <string name="time_format_help">Examples: HH:mm, hh:mm a, HH:mm:ss, HH mm</string>
+
+    <string name="save">Save</string>
+
+    <string name="day_colour">DAY colour</string>
+    <string name="date_colour">DATE colour</string>
+    <string name="time_colour">TIME colour</string>
+
+    <string name="copy">Copy</string>
+    <string name="quick_colours">Quick colours</string>
+    <string name="hex_colour">HEX colour</string>
+    <string name="invalid_hex_colour">Enter a valid HEX colour</string>
+
+    <string name="rgb_value">RGB    rgb(%1$d, %2$d, %3$d)</string>
+    <string name="hsl_value">HSL    hsl(%1$d°, %2$d%%, %3$d%%)</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
+    <string name="close">Close</string>
+
+    <string name="app_settings">App Settings</string>
+    <string name="about">About</string>
+    <string name="github">GitHub</string>
+
+    <string name="colour_dialog_title">%1$s colour</string>
+
+    <string name="about_message">Modern Clock
+Version 1.0
+
+A modern, minimalist clock widget for Android.
+
+Inspired by KDE Modern Clock by Prayag2.
+
+Original project:
+github.com/Prayag2/kde_modernclock
+
+Android implementation:
+Dark-Witcher
+
+License: GPL-3.0</string>
+
+    <string name="hex_colour_clipboard_label">HEX colour</string>
+
+</resources>

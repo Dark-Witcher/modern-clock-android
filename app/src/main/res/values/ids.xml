@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="date_format_1" type="id" />
+    <item name="date_format_2" type="id" />
+    <item name="date_format_3" type="id" />
+    <item name="date_format_4" type="id" />
+    <item name="date_format_5" type="id" />
+    <item name="date_format_6" type="id" />
+
+</resources>
