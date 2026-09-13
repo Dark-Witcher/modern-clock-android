@@ -8,3 +8,8 @@ local.properties
 .externalNativeBuild/
 .cxx/
 app/build/
+
+# Release/signing artifacts
+*.jks
+*.apk
+output-metadata.json
