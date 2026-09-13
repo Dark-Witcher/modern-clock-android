@@ -2,7 +2,7 @@
 
 > A minimalist, customizable Android home-screen clock widget inspired by KDE Modern Clock.
 
-<div style="text-align: center">
+<div align="center">
   <a href="https://github.com/Dark-Witcher/modern-clock-android/releases">
     <img src="https://img.shields.io/github/v/release/Dark-Witcher/modern-clock-android?style=for-the-badge&label=Latest%20Release" alt="Latest Release">
   </a>
@@ -14,7 +14,7 @@
   </a>
 </div>
 
-<div style="text-align: center">
+<div align="center">
   <img src="docs/images/hero.png" alt="Modern Clock running on a Samsung Galaxy S23 Ultra" width="900">
 </div>
 
@@ -46,7 +46,7 @@ It is deliberately simple: a stylized day, date, and time — with enough contro
 
 Modern Clock is designed to work naturally with your existing home screen and wallpaper.
 
-<div style="text-align: center">
+<div align="center">
   <img src="docs/images/homescreen_showcase.png" alt="Modern Clock on phone and tablet home screens">
 </div>
 
@@ -54,7 +54,7 @@ Modern Clock is designed to work naturally with your existing home screen and wa
 
 Configure the widget directly from the app, with a live preview of your changes.
 
-<div style="text-align: center">
+<div align="center">
   <img src="docs/images/settings_showcase.png" alt="Modern Clock widget settings on phone and tablet">
 </div>
 
@@ -231,4 +231,4 @@ See [`LICENSE`](LICENSE) for the complete license text.
 
 ---
 
-<div style="text-align: center"> **Simple. Minimal. Always visible.** </div>
+<div align="center"> **Simple. Minimal. Always visible.** </div>
