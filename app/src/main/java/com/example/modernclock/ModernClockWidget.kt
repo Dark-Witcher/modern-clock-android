@@ -24,14 +24,56 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 class ModernClockWidget : AppWidgetProvider() {
+
+    /*
+     * =========================================================
+     * FONT SIZE TYPES
+     * =========================================================
+     *
+     * These are nested directly inside ModernClockWidget rather
+     * than inside the companion object so they can be referenced
+     * cleanly from MainActivity as:
+     *
+     * ModernClockWidget.FontSizeValues
+     * ModernClockWidget.FontSizeElement
+     */
+
+    data class FontSizeValues(
+        val day: Int,
+        val date: Int,
+        val time: Int
+    )
+
+    enum class FontSizeElement {
+        DAY,
+        DATE,
+        TIME
+    }
 
     companion object {
 
         const val ACTION_UPDATE =
             "com.example.modernclock.UPDATE"
+
+        /*
+         * =====================================================
+         * WIDGET LOCALE
+         * =====================================================
+         *
+         * The widget currently uses English for DAY and DATE.
+         *
+         * Keep locale selection behind this function so that
+         * user-selectable widget locales can be introduced in
+         * a future version without changing the rendering code.
+         */
+
+        private fun getWidgetLocale(): Locale {
+            return Locale.ENGLISH
+        }
 
         /*
          * =====================================================
@@ -59,6 +101,18 @@ class ModernClockWidget : AppWidgetProvider() {
 
         /*
          * =====================================================
+         * FONT SIZE RANGE
+         * =====================================================
+         */
+
+        private const val MIN_SIZE_PERCENT =
+            50
+
+        private const val MAX_SIZE_PERCENT =
+            200
+
+        /*
+         * =====================================================
          * DATE / TIME
          * =====================================================
          */
@@ -76,12 +130,6 @@ class ModernClockWidget : AppWidgetProvider() {
          * =====================================================
          * TEXT SHADOW
          * =====================================================
-         *
-         * The original KDE clock uses a subtle shadow so the
-         * white text remains readable over bright wallpapers.
-         *
-         * Shadow rendering is applied independently of the
-         * text layout and therefore does not affect sizing.
          */
 
         private const val SHADOW_RADIUS_DP =
@@ -98,14 +146,833 @@ class ModernClockWidget : AppWidgetProvider() {
 
         /*
          * =====================================================
-         * LIVE SECOND UPDATES
+         * FONT FITTING
+         * =====================================================
+         */
+
+        private data class LayoutMeasurement(
+            val totalHeight: Float,
+            val availableHeight: Float
+        )
+
+        /*
+         * =====================================================
+         * SHADOW CONFIGURATION
          * =====================================================
          *
-         * Do NOT keep a strong Context reference in this
-         * singleton companion object.
+         * Shadow settings are kept as a small independent
+         * configuration object so DAY, DATE and TIME can each
+         * have their own enabled state and colour without
+         * duplicating shadow-rendering logic.
+         */
+
+        private data class ShadowConfig(
+            val enabled: Boolean,
+            val color: Int
+        )
+
+        /*
+         * =====================================================
+         * SHADOW CONFIG HELPERS
+         * =====================================================
+         */
+
+        private fun getDayShadowConfig(
+            context: Context
+        ): ShadowConfig {
+
+            return ShadowConfig(
+                enabled =
+                    MainActivity.getGlobalDayShadowEnabled(
+                        context
+                    ),
+                color =
+                    parseShadowColor(
+                        MainActivity.getGlobalDayShadowColor(
+                            context
+                        )
+                    )
+            )
+        }
+
+        private fun getDateShadowConfig(
+            context: Context
+        ): ShadowConfig {
+
+            return ShadowConfig(
+                enabled =
+                    MainActivity.getGlobalDateShadowEnabled(
+                        context
+                    ),
+                color =
+                    parseShadowColor(
+                        MainActivity.getGlobalDateShadowColor(
+                            context
+                        )
+                    )
+            )
+        }
+
+        private fun getTimeShadowConfig(
+            context: Context
+        ): ShadowConfig {
+
+            return ShadowConfig(
+                enabled =
+                    MainActivity.getGlobalTimeShadowEnabled(
+                        context
+                    ),
+                color =
+                    parseShadowColor(
+                        MainActivity.getGlobalTimeShadowColor(
+                            context
+                        )
+                    )
+            )
+        }
+
+        private fun parseShadowColor(
+            color: String
+        ): Int {
+
+            return try {
+
+                color.toColorInt()
+
+            } catch (
+                _: IllegalArgumentException
+            ) {
+
+                Color.BLACK
+            }
+        }
+
+        /*
+         * =====================================================
+         * APPLY SHADOW
+         * =====================================================
          *
-         * A WeakReference prevents the static object from
-         * retaining the Context.
+         * Geometry remains fixed for v1.1:
+         *
+         * Radius: 2.5dp
+         * X:      0dp
+         * Y:      1.5dp
+         * Alpha:  180
+         *
+         * The configured colour supplies RGB values while the
+         * fixed alpha is applied here.
+         */
+
+        private fun applyShadow(
+            paint: Paint,
+            config: ShadowConfig,
+            density: Float
+        ) {
+
+            if (!config.enabled) {
+
+                paint.clearShadowLayer()
+
+                return
+            }
+
+            val shadowRadius =
+                SHADOW_RADIUS_DP *
+                        density
+
+            val shadowOffsetX =
+                SHADOW_OFFSET_X_DP *
+                        density
+
+            val shadowOffsetY =
+                SHADOW_OFFSET_Y_DP *
+                        density
+
+            val shadowColor =
+                Color.argb(
+                    SHADOW_ALPHA,
+                    Color.red(config.color),
+                    Color.green(config.color),
+                    Color.blue(config.color)
+                )
+
+            paint.setShadowLayer(
+                shadowRadius,
+                shadowOffsetX,
+                shadowOffsetY,
+                shadowColor
+            )
+        }
+
+        /*
+         * =====================================================
+         * SHARED FONT FITTING CALCULATION
+         * =====================================================
+         */
+
+        fun calculateFittedFontSizes(
+            context: Context,
+            widthDp: Int,
+            heightDp: Int,
+            timeFormat: String,
+            dateFormat: String,
+            showDay: Boolean,
+            dayLetterSpacing: Float,
+            requestedDaySizePercent: Int,
+            requestedDateSizePercent: Int,
+            requestedTimeSizePercent: Int,
+            changedElement: FontSizeElement? = null
+        ): FontSizeValues {
+
+            val safeWidthDp =
+                max(
+                    1,
+                    widthDp
+                )
+
+            val safeHeightDp =
+                max(
+                    1,
+                    heightDp
+                )
+
+            var dayResult =
+                requestedDaySizePercent.coerceIn(
+                    MIN_SIZE_PERCENT,
+                    MAX_SIZE_PERCENT
+                )
+
+            var dateResult =
+                requestedDateSizePercent.coerceIn(
+                    MIN_SIZE_PERCENT,
+                    MAX_SIZE_PERCENT
+                )
+
+            var timeResult =
+                requestedTimeSizePercent.coerceIn(
+                    MIN_SIZE_PERCENT,
+                    MAX_SIZE_PERCENT
+                )
+
+            val now =
+                Date()
+
+            val widgetLocale =
+                getWidgetLocale()
+
+            val dayText =
+                SimpleDateFormat(
+                    "EEEE",
+                    widgetLocale
+                )
+                    .format(now)
+                    .uppercase(
+                        widgetLocale
+                    )
+
+            val dateText =
+                SimpleDateFormat(
+                    dateFormat,
+                    widgetLocale
+                )
+                    .format(now)
+                    .uppercase(
+                        widgetLocale
+                    )
+
+            val timeText =
+                SimpleDateFormat(
+                    timeFormat,
+                    Locale.getDefault()
+                )
+                    .format(now)
+
+            val dayTypeface =
+                ResourcesCompat.getFont(
+                    context,
+                    R.font.anurati
+                ) ?: Typeface.DEFAULT
+
+            val secondaryTypeface =
+                ResourcesCompat.getFont(
+                    context,
+                    R.font.poppins
+                ) ?: Typeface.DEFAULT
+
+            val density =
+                context.resources
+                    .displayMetrics
+                    .density
+
+            /*
+             * =================================================
+             * BASE SIZES
+             * =================================================
+             */
+
+            val heightRatio =
+                max(
+                    1f,
+                    safeHeightDp /
+                            REFERENCE_HEIGHT_DP
+                )
+
+            val heightScale =
+                sqrt(
+                    heightRatio
+                )
+
+            val widthScale =
+                safeWidthDp /
+                        REFERENCE_WIDTH_DP
+
+            /*
+             * =================================================
+             * DAY BASE SIZE
+             * =================================================
+             */
+
+            val dayPaint =
+                Paint(
+                    Paint.ANTI_ALIAS_FLAG or
+                            Paint.SUBPIXEL_TEXT_FLAG
+                ).apply {
+
+                    typeface =
+                        dayTypeface
+
+                    textAlign =
+                        Paint.Align.CENTER
+                }
+
+            val referenceWidthPx =
+                REFERENCE_WIDTH_DP *
+                        density
+
+            val referenceTargetWidth =
+                referenceWidthPx *
+                        DAY_WIDTH_RATIO
+
+            var lowSize =
+                1f
+
+            var highSize =
+                300f *
+                        density
+
+            repeat(24) {
+
+                val testSize =
+                    (
+                            lowSize +
+                                    highSize
+                            ) / 2f
+
+                dayPaint.textSize =
+                    testSize
+
+                dayPaint.letterSpacing =
+                    DEFAULT_DAY_LETTER_SPACING /
+                            testSize
+
+                val measuredWidth =
+                    dayPaint.measureText(
+                        dayText
+                    )
+
+                if (
+                    measuredWidth <
+                    referenceTargetWidth
+                ) {
+
+                    lowSize =
+                        testSize
+
+                } else {
+
+                    highSize =
+                        testSize
+                }
+            }
+
+            val baseDaySize =
+                lowSize *
+                        widthScale
+
+            /*
+             * =================================================
+             * DATE / TIME BASE SIZE
+             * =================================================
+             */
+
+            val baseSecondarySize =
+                BASE_DATE_TIME_DP *
+                        heightScale *
+                        density
+
+            /*
+             * =================================================
+             * MEASUREMENT FUNCTION
+             * =================================================
+             */
+
+            fun calculateLayout(
+                dayPercent: Int,
+                datePercent: Int,
+                timePercent: Int
+            ): LayoutMeasurement {
+
+                val measuredDayPaint =
+                    Paint(
+                        Paint.ANTI_ALIAS_FLAG or
+                                Paint.SUBPIXEL_TEXT_FLAG
+                    ).apply {
+
+                        typeface =
+                            dayTypeface
+
+                        textAlign =
+                            Paint.Align.CENTER
+
+                        textSize =
+                            baseDaySize *
+                                    dayPercent /
+                                    100f
+
+                        val safeSpacing =
+                            dayLetterSpacing.coerceIn(
+                                0f,
+                                100f
+                            )
+
+                        letterSpacing =
+                            safeSpacing /
+                                    textSize
+                    }
+
+                val measuredDatePaint =
+                    Paint(
+                        Paint.ANTI_ALIAS_FLAG or
+                                Paint.SUBPIXEL_TEXT_FLAG
+                    ).apply {
+
+                        typeface =
+                            secondaryTypeface
+
+                        textAlign =
+                            Paint.Align.CENTER
+
+                        textSize =
+                            baseSecondarySize *
+                                    datePercent /
+                                    100f
+
+                        letterSpacing =
+                            3f /
+                                    19f
+                    }
+
+                val measuredTimePaint =
+                    Paint(
+                        Paint.ANTI_ALIAS_FLAG or
+                                Paint.SUBPIXEL_TEXT_FLAG
+                    ).apply {
+
+                        typeface =
+                            secondaryTypeface
+
+                        textAlign =
+                            Paint.Align.CENTER
+
+                        textSize =
+                            baseSecondarySize *
+                                    timePercent /
+                                    100f
+
+                        letterSpacing =
+                            3f /
+                                    19f
+                    }
+
+                val dayBounds =
+                    android.graphics.Rect()
+
+                val dateBounds =
+                    android.graphics.Rect()
+
+                val timeBounds =
+                    android.graphics.Rect()
+
+                if (showDay) {
+
+                    measuredDayPaint.getTextBounds(
+                        dayText,
+                        0,
+                        dayText.length,
+                        dayBounds
+                    )
+                }
+
+                measuredDatePaint.getTextBounds(
+                    dateText,
+                    0,
+                    dateText.length,
+                    dateBounds
+                )
+
+                measuredTimePaint.getTextBounds(
+                    timeText,
+                    0,
+                    timeText.length,
+                    timeBounds
+                )
+
+                val visualSpacing =
+                    BASE_SPACING_DP *
+                            heightScale *
+                            density
+
+                val availableHeight =
+                    safeHeightDp *
+                            density *
+                            0.96f
+
+                val dayHeight =
+                    if (showDay) {
+                        dayBounds.height()
+                    } else {
+                        0
+                    }
+
+                val spacingCount =
+                    if (showDay) {
+                        2f
+                    } else {
+                        1f
+                    }
+
+                val totalHeight =
+                    dayHeight +
+                            dateBounds.height() +
+                            timeBounds.height() +
+                            visualSpacing *
+                            spacingCount
+
+                return LayoutMeasurement(
+                    totalHeight =
+                        totalHeight,
+                    availableHeight =
+                        availableHeight
+                )
+            }
+
+            /*
+             * =================================================
+             * FIT CHECK
+             * =================================================
+             */
+
+            fun fits(
+                dayPercent: Int,
+                datePercent: Int,
+                timePercent: Int
+            ): Boolean {
+
+                val measurement =
+                    calculateLayout(
+                        dayPercent,
+                        datePercent,
+                        timePercent
+                    )
+
+                return measurement.totalHeight <=
+                        measurement.availableHeight
+            }
+
+            /*
+             * =================================================
+             * ALREADY FITS
+             * =================================================
+             */
+
+            if (
+                fits(
+                    dayResult,
+                    dateResult,
+                    timeResult
+                )
+            ) {
+
+                return FontSizeValues(
+                    day = dayResult,
+                    date = dateResult,
+                    time = timeResult
+                )
+            }
+
+            /*
+             * =================================================
+             * PRIORITIZED FITTING
+             * =================================================
+             */
+
+            if (
+                changedElement != null
+            ) {
+
+                fun findMaximumFittingValue(
+                    element: FontSizeElement
+                ): Int {
+
+                    var low =
+                        MIN_SIZE_PERCENT
+
+                    var high =
+                        when (element) {
+
+                            FontSizeElement.DAY ->
+                                dayResult
+
+                            FontSizeElement.DATE ->
+                                dateResult
+
+                            FontSizeElement.TIME ->
+                                timeResult
+                        }
+
+                    var best =
+                        MIN_SIZE_PERCENT
+
+                    while (
+                        low <= high
+                    ) {
+
+                        val middle =
+                            (
+                                    low +
+                                            high
+                                    ) / 2
+
+                        val testDay =
+                            when (element) {
+
+                                FontSizeElement.DAY ->
+                                    middle
+
+                                else ->
+                                    dayResult
+                            }
+
+                        val testDate =
+                            when (element) {
+
+                                FontSizeElement.DATE ->
+                                    middle
+
+                                else ->
+                                    dateResult
+                            }
+
+                        val testTime =
+                            when (element) {
+
+                                FontSizeElement.TIME ->
+                                    middle
+
+                                else ->
+                                    timeResult
+                            }
+
+                        if (
+                            fits(
+                                testDay,
+                                testDate,
+                                testTime
+                            )
+                        ) {
+
+                            best =
+                                middle
+
+                            low =
+                                middle + 1
+
+                        } else {
+
+                            high =
+                                middle - 1
+                        }
+                    }
+
+                    return best
+                }
+
+                when (
+                    changedElement
+                ) {
+
+                    FontSizeElement.DAY -> {
+
+                        dayResult =
+                            findMaximumFittingValue(
+                                FontSizeElement.DAY
+                            )
+                    }
+
+                    FontSizeElement.DATE -> {
+
+                        dateResult =
+                            findMaximumFittingValue(
+                                FontSizeElement.DATE
+                            )
+                    }
+
+                    FontSizeElement.TIME -> {
+
+                        timeResult =
+                            findMaximumFittingValue(
+                                FontSizeElement.TIME
+                            )
+                    }
+                }
+
+                if (
+                    fits(
+                        dayResult,
+                        dateResult,
+                        timeResult
+                    )
+                ) {
+
+                    return FontSizeValues(
+                        day = dayResult,
+                        date = dateResult,
+                        time = timeResult
+                    )
+                }
+            }
+
+            /*
+             * =================================================
+             * FALLBACK NORMALIZATION
+             * =================================================
+             */
+
+            var scaleLow =
+                0.5f
+
+            var scaleHigh =
+                1f
+
+            var bestScale =
+                0.5f
+
+            repeat(20) {
+
+                val scale =
+                    (
+                            scaleLow +
+                                    scaleHigh
+                            ) / 2f
+
+                val testDay =
+                    max(
+                        MIN_SIZE_PERCENT,
+                        (
+                                dayResult *
+                                        scale
+                                ).roundToInt()
+                    )
+
+                val testDate =
+                    max(
+                        MIN_SIZE_PERCENT,
+                        (
+                                dateResult *
+                                        scale
+                                ).roundToInt()
+                    )
+
+                val testTime =
+                    max(
+                        MIN_SIZE_PERCENT,
+                        (
+                                timeResult *
+                                        scale
+                                ).roundToInt()
+                    )
+
+                if (
+                    fits(
+                        testDay,
+                        testDate,
+                        testTime
+                    )
+                ) {
+
+                    bestScale =
+                        scale
+
+                    scaleLow =
+                        scale
+
+                } else {
+
+                    scaleHigh =
+                        scale
+                }
+            }
+
+            dayResult =
+                max(
+                    MIN_SIZE_PERCENT,
+                    (
+                            dayResult *
+                                    bestScale
+                            ).roundToInt()
+                )
+
+            dateResult =
+                max(
+                    MIN_SIZE_PERCENT,
+                    (
+                            dateResult *
+                                    bestScale
+                            ).roundToInt()
+                )
+
+            timeResult =
+                max(
+                    MIN_SIZE_PERCENT,
+                    (
+                            timeResult *
+                                    bestScale
+                            ).roundToInt()
+                )
+
+            return FontSizeValues(
+                day =
+                    dayResult.coerceIn(
+                        MIN_SIZE_PERCENT,
+                        MAX_SIZE_PERCENT
+                    ),
+                date =
+                    dateResult.coerceIn(
+                        MIN_SIZE_PERCENT,
+                        MAX_SIZE_PERCENT
+                    ),
+                time =
+                    timeResult.coerceIn(
+                        MIN_SIZE_PERCENT,
+                        MAX_SIZE_PERCENT
+                    )
+            )
+        }
+
+        /*
+         * =====================================================
+         * LIVE SECOND UPDATES
+         * =====================================================
          */
 
         private val handler =
@@ -122,13 +989,6 @@ class ModernClockWidget : AppWidgetProvider() {
 
                 override fun run() {
 
-                    /*
-                     * Retrieve the actual Context from the
-                     * WeakReference.
-                     *
-                     * If it has disappeared, simply stop.
-                     */
-
                     val context =
                         liveUpdateContext
                             ?.get()
@@ -144,6 +1004,7 @@ class ModernClockWidget : AppWidgetProvider() {
                             "s"
                         )
                     ) {
+
                         return
                     }
 
@@ -156,13 +1017,16 @@ class ModernClockWidget : AppWidgetProvider() {
 
                     val nextSecond =
                         (
-                                now / 1_000L + 1L
-                                ) * 1_000L
+                                now / 1_000L +
+                                        1L
+                                ) *
+                                1_000L
 
                     val delay =
                         max(
                             1L,
-                            nextSecond - now
+                            nextSecond -
+                                    now
                         )
 
                     handler.postDelayed(
@@ -234,7 +1098,8 @@ class ModernClockWidget : AppWidgetProvider() {
          */
 
         fun updateAllWidgets(
-            context: Context
+            context: Context,
+            changedElement: FontSizeElement? = null
         ) {
 
             val appWidgetManager =
@@ -261,7 +1126,8 @@ class ModernClockWidget : AppWidgetProvider() {
                 updateWidget(
                     context,
                     appWidgetManager,
-                    appWidgetId
+                    appWidgetId,
+                    changedElement
                 )
             }
         }
@@ -275,7 +1141,8 @@ class ModernClockWidget : AppWidgetProvider() {
         private fun updateWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
-            appWidgetId: Int
+            appWidgetId: Int,
+            changedElement: FontSizeElement? = null
         ) {
 
             val options =
@@ -298,23 +1165,64 @@ class ModernClockWidget : AppWidgetProvider() {
                     REFERENCE_HEIGHT_DP.toInt()
                 )
 
+            val timeFormat =
+                MainActivity.getGlobalTimeFormat(
+                    context
+                )
+
+            val dateFormat =
+                MainActivity.getGlobalDateFormat(
+                    context
+                )
+
+            val showDay =
+                MainActivity.getGlobalShowDay(
+                    context
+                )
+
+            val dayLetterSpacing =
+                MainActivity.getGlobalDayLetterSpacing(
+                    context
+                )
+
+            val requestedDaySize =
+                MainActivity.getGlobalDayFontSize(
+                    context
+                )
+
+            val requestedDateSize =
+                MainActivity.getGlobalDateFontSize(
+                    context
+                )
+
+            val requestedTimeSize =
+                MainActivity.getGlobalTimeFontSize(
+                    context
+                )
+
+            val fittedSizes =
+                calculateFittedFontSizes(
+                    context = context,
+                    widthDp = widthDp,
+                    heightDp = heightDp,
+                    timeFormat = timeFormat,
+                    dateFormat = dateFormat,
+                    showDay = showDay,
+                    dayLetterSpacing = dayLetterSpacing,
+                    requestedDaySizePercent = requestedDaySize,
+                    requestedDateSizePercent = requestedDateSize,
+                    requestedTimeSizePercent = requestedTimeSize,
+                    changedElement = changedElement
+                )
+
             val bitmap =
                 createClockBitmap(
                     context = context,
                     widthDp = widthDp,
                     heightDp = heightDp,
-                    timeFormat =
-                        MainActivity.getGlobalTimeFormat(
-                            context
-                        ),
-                    dateFormat =
-                        MainActivity.getGlobalDateFormat(
-                            context
-                        ),
-                    showDay =
-                        MainActivity.getGlobalShowDay(
-                            context
-                        ),
+                    timeFormat = timeFormat,
+                    dateFormat = dateFormat,
+                    showDay = showDay,
                     dayColor =
                         getDayColor(
                             context
@@ -328,9 +1236,13 @@ class ModernClockWidget : AppWidgetProvider() {
                             context
                         ),
                     dayLetterSpacing =
-                        MainActivity.getGlobalDayLetterSpacing(
-                            context
-                        )
+                        dayLetterSpacing,
+                    daySizePercent =
+                        fittedSizes.day,
+                    dateSizePercent =
+                        fittedSizes.date,
+                    timeSizePercent =
+                        fittedSizes.time
                 )
 
             val views =
@@ -343,10 +1255,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 R.id.widget_clock,
                 bitmap
             )
-
-            /*
-             * Tapping the widget opens the application.
-             */
 
             val launchIntent =
                 Intent(
@@ -390,8 +1298,7 @@ class ModernClockWidget : AppWidgetProvider() {
         ): Bitmap {
 
             val density =
-                context
-                    .resources
+                context.resources
                     .displayMetrics
                     .density
 
@@ -429,6 +1336,18 @@ class ModernClockWidget : AppWidgetProvider() {
                 dayLetterSpacing =
                     MainActivity.getGlobalDayLetterSpacing(
                         context
+                    ),
+                daySizePercent =
+                    MainActivity.getGlobalDayFontSize(
+                        context
+                    ),
+                dateSizePercent =
+                    MainActivity.getGlobalDateFontSize(
+                        context
+                    ),
+                timeSizePercent =
+                    MainActivity.getGlobalTimeFontSize(
+                        context
                     )
             )
         }
@@ -436,8 +1355,7 @@ class ModernClockWidget : AppWidgetProvider() {
         /*
          * =====================================================
          * CLOCK BITMAP
-         * =====================================================
-         */
+         * ===================================================== */
 
         private fun createClockBitmap(
             context: Context,
@@ -449,12 +1367,14 @@ class ModernClockWidget : AppWidgetProvider() {
             dayColor: Int,
             dateColor: Int,
             timeColor: Int,
-            dayLetterSpacing: Float
+            dayLetterSpacing: Float,
+            daySizePercent: Int,
+            dateSizePercent: Int,
+            timeSizePercent: Int
         ): Bitmap {
 
             val density =
-                context
-                    .resources
+                context.resources
                     .displayMetrics
                     .density
 
@@ -470,33 +1390,30 @@ class ModernClockWidget : AppWidgetProvider() {
                     (heightDp * density).toInt()
                 )
 
-            /*
-             * =================================================
-             * DATE / TIME TEXT
-             * =================================================
-             */
-
             val now =
                 Date()
+
+            val widgetLocale =
+                getWidgetLocale()
 
             val dayText =
                 SimpleDateFormat(
                     "EEEE",
-                    Locale.getDefault()
+                    widgetLocale
                 )
                     .format(now)
                     .uppercase(
-                        Locale.getDefault()
+                        widgetLocale
                     )
 
             val dateText =
                 SimpleDateFormat(
                     dateFormat,
-                    Locale.getDefault()
+                    widgetLocale
                 )
                     .format(now)
                     .uppercase(
-                        Locale.getDefault()
+                        widgetLocale
                     )
 
             val timeText =
@@ -505,12 +1422,6 @@ class ModernClockWidget : AppWidgetProvider() {
                     Locale.getDefault()
                 )
                     .format(now)
-
-            /*
-             * =================================================
-             * FONTS
-             * =================================================
-             */
 
             val dayTypeface =
                 ResourcesCompat.getFont(
@@ -524,16 +1435,6 @@ class ModernClockWidget : AppWidgetProvider() {
                     R.font.poppins
                 ) ?: Typeface.DEFAULT
 
-            /*
-             * =================================================
-             * HEIGHT SCALE
-             * =================================================
-             *
-             * DATE/TIME and vertical spacing scale with height.
-             *
-             * DAY does NOT.
-             */
-
             val heightRatio =
                 max(
                     1f,
@@ -545,12 +1446,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 sqrt(
                     heightRatio
                 )
-
-            /*
-             * =================================================
-             * DAY PAINT
-             * =================================================
-             */
 
             val dayPaint =
                 Paint(
@@ -567,18 +1462,6 @@ class ModernClockWidget : AppWidgetProvider() {
                     textAlign =
                         Paint.Align.CENTER
                 }
-
-            /*
-             * =================================================
-             * DAY BASE FONT SIZE
-             * =================================================
-             *
-             * Calculate the original base DAY size at the
-             * reference width.
-             *
-             * The original KDE spacing of 17 is used only for
-             * establishing that base size.
-             */
 
             val referenceWidthPx =
                 REFERENCE_WIDTH_DP *
@@ -630,14 +1513,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 }
             }
 
-            /*
-             * =================================================
-             * SCALE DAY WITH WIDTH
-             * =================================================
-             *
-             * This is independent from widget height.
-             */
-
             val widthScale =
                 widthDp /
                         REFERENCE_WIDTH_DP
@@ -646,15 +1521,15 @@ class ModernClockWidget : AppWidgetProvider() {
                 lowSize *
                         widthScale
 
-            /*
-             * =================================================
-             * APPLY USER LETTER SPACING
-             * =================================================
-             *
-             * IMPORTANT:
-             *
-             * Changing this value does NOT change textSize.
-             */
+            val safeDaySizePercent =
+                daySizePercent.coerceIn(
+                    MIN_SIZE_PERCENT,
+                    MAX_SIZE_PERCENT
+                )
+
+            dayPaint.textSize *=
+                safeDaySizePercent /
+                        100f
 
             val safeLetterSpacing =
                 dayLetterSpacing.coerceIn(
@@ -665,16 +1540,6 @@ class ModernClockWidget : AppWidgetProvider() {
             dayPaint.letterSpacing =
                 safeLetterSpacing /
                         dayPaint.textSize
-
-            /*
-             * No width-fitting/shrinking happens here.
-             */
-
-            /*
-             * =================================================
-             * DATE / TIME
-             * =================================================
-             */
 
             val secondarySize =
                 BASE_DATE_TIME_DP *
@@ -727,61 +1592,64 @@ class ModernClockWidget : AppWidgetProvider() {
                                 19f
                 }
 
-            /*
-             * =================================================
-             * TEXT SHADOW
-             * =================================================
-             *
-             * Apply the same subtle shadow to all three text
-             * elements.
-             */
-
-            val shadowRadius =
-                SHADOW_RADIUS_DP *
-                        density
-
-            val shadowOffsetX =
-                SHADOW_OFFSET_X_DP *
-                        density
-
-            val shadowOffsetY =
-                SHADOW_OFFSET_Y_DP *
-                        density
-
-            val shadowColor =
-                Color.argb(
-                    SHADOW_ALPHA,
-                    0,
-                    0,
-                    0
+            val safeDateSizePercent =
+                dateSizePercent.coerceIn(
+                    MIN_SIZE_PERCENT,
+                    MAX_SIZE_PERCENT
                 )
 
-            dayPaint.setShadowLayer(
-                shadowRadius,
-                shadowOffsetX,
-                shadowOffsetY,
-                shadowColor
-            )
+            val safeTimeSizePercent =
+                timeSizePercent.coerceIn(
+                    MIN_SIZE_PERCENT,
+                    MAX_SIZE_PERCENT
+                )
 
-            datePaint.setShadowLayer(
-                shadowRadius,
-                shadowOffsetX,
-                shadowOffsetY,
-                shadowColor
-            )
+            datePaint.textSize *=
+                safeDateSizePercent /
+                        100f
 
-            timePaint.setShadowLayer(
-                shadowRadius,
-                shadowOffsetX,
-                shadowOffsetY,
-                shadowColor
-            )
+            timePaint.textSize *=
+                safeTimeSizePercent /
+                        100f
 
             /*
              * =================================================
-             * TEXT BOUNDS
+             * SHADOW CONFIGURATION
              * =================================================
              */
+
+            val dayShadow =
+                getDayShadowConfig(
+                    context
+                )
+
+            val dateShadow =
+                getDateShadowConfig(
+                    context
+                )
+
+            val timeShadow =
+                getTimeShadowConfig(
+                    context
+                )
+
+            applyShadow(
+                paint = dayPaint,
+                config = dayShadow,
+                density = density
+            )
+
+            applyShadow(
+                paint = datePaint,
+                config = dateShadow,
+                density = density
+            )
+
+            applyShadow(
+                paint = timePaint,
+                config = timeShadow,
+                density = density
+            )
 
             val dayBounds =
                 android.graphics.Rect()
@@ -816,137 +1684,29 @@ class ModernClockWidget : AppWidgetProvider() {
                 timeBounds
             )
 
-            /*
-             * =================================================
-             * VERTICAL SPACING
-             * =================================================
-             */
-
-            var visualSpacing =
+            val visualSpacing =
                 BASE_SPACING_DP *
                         heightScale *
                         density
 
-            val availableHeight =
-                heightPx *
-                        0.96f
-
-            val dayHeight =
-                if (showDay) {
-                    dayBounds.height()
-                } else {
-                    0
-                }
-
-            val spacingCount =
-                if (showDay) {
-                    2f
-                } else {
-                    1f
-                }
-
-            var totalHeight =
-                dayHeight +
+            val totalHeight =
+                (
+                        if (showDay) {
+                            dayBounds.height()
+                        } else {
+                            0
+                        }
+                        ) +
                         dateBounds.height() +
                         timeBounds.height() +
                         visualSpacing *
-                        spacingCount
-
-            /*
-             * Reduce spacing first.
-             */
-
-            if (
-                totalHeight >
-                availableHeight
-            ) {
-
-                val availableForSpacing =
-                    availableHeight -
-                            dayHeight -
-                            dateBounds.height() -
-                            timeBounds.height()
-
-                visualSpacing =
-                    max(
-                        1f * density,
-                        availableForSpacing /
-                                spacingCount
-                    )
-
-                totalHeight =
-                    dayHeight +
-                            dateBounds.height() +
-                            timeBounds.height() +
-                            visualSpacing *
-                            spacingCount
-            }
-
-            /*
-             * If the secondary elements still do not fit,
-             * scale DATE/TIME only.
-             *
-             * DAY remains untouched.
-             */
-
-            if (
-                totalHeight >
-                availableHeight
-            ) {
-
-                val secondaryContentHeight =
-                    dateBounds.height() +
-                            timeBounds.height() +
-                            visualSpacing *
-                            spacingCount
-
-                val availableSecondaryHeight =
-                    availableHeight -
-                            dayHeight
-
-                val fitScale =
-                    max(
-                        0.5f,
-                        availableSecondaryHeight /
-                                secondaryContentHeight
-                    )
-
-                datePaint.textSize *=
-                    fitScale
-
-                timePaint.textSize *=
-                    fitScale
-
-                visualSpacing *=
-                    fitScale
-
-                datePaint.getTextBounds(
-                    dateText,
-                    0,
-                    dateText.length,
-                    dateBounds
-                )
-
-                timePaint.getTextBounds(
-                    timeText,
-                    0,
-                    timeText.length,
-                    timeBounds
-                )
-
-                totalHeight =
-                    dayHeight +
-                            dateBounds.height() +
-                            timeBounds.height() +
-                            visualSpacing *
-                            spacingCount
-            }
-
-            /*
-             * =================================================
-             * BITMAP
-             * =================================================
-             */
+                        (
+                                if (showDay) {
+                                    2f
+                                } else {
+                                    1f
+                                }
+                                )
 
             val bitmap =
                 createBitmap(
@@ -972,12 +1732,6 @@ class ModernClockWidget : AppWidgetProvider() {
                                 totalHeight
                         ) / 2f
 
-            /*
-             * =================================================
-             * DAY
-             * =================================================
-             */
-
             if (showDay) {
 
                 val baseline =
@@ -996,12 +1750,6 @@ class ModernClockWidget : AppWidgetProvider() {
                             visualSpacing
             }
 
-            /*
-             * =================================================
-             * DATE
-             * =================================================
-             */
-
             val dateBaseline =
                 currentTop -
                         dateBounds.top
@@ -1016,12 +1764,6 @@ class ModernClockWidget : AppWidgetProvider() {
             currentTop +=
                 dateBounds.height() +
                         visualSpacing
-
-            /*
-             * =================================================
-             * TIME
-             * =================================================
-             */
 
             val timeBaseline =
                 currentTop -
@@ -1086,11 +1828,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 stopLiveUpdates()
                 return
             }
-
-            /*
-             * Store only a weak reference to the application
-             * context.
-             */
 
             liveUpdateContext =
                 WeakReference(
@@ -1175,7 +1912,8 @@ class ModernClockWidget : AppWidgetProvider() {
                 (
                         currentTime / 60_000L +
                                 1
-                        ) * 60_000L
+                        ) *
+                        60_000L
 
             val elapsedRealtime =
                 SystemClock.elapsedRealtime()

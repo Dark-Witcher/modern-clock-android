@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">Modern Clock</string>
+    <string name="app_version">1.1</string>
 
     <string name="widget_settings">Widget Settings</string>
     <string name="preview">Preview</string>
@@ -28,6 +29,24 @@
     <string name="date_colour">DATE colour</string>
     <string name="time_colour">TIME colour</string>
 
+    <string name="day_font_size">DAY Font Size</string>
+    <string name="date_font_size">DATE Font Size</string>
+    <string name="time_font_size">TIME Font Size</string>
+    <string name="smaller">Smaller</string>
+    <string name="larger">Larger</string>
+    <string name="reset_to_default">Reset to default</string>
+
+    <string name="shadow">Shadow</string>
+    <string name="shadow_colour">Shadow Colour</string>
+    <string name="day_shadow">DAY Shadow</string>
+    <string name="date_shadow">DATE Shadow</string>
+    <string name="time_shadow">TIME Shadow</string>
+
+    <string name="section_expanded_format">▾  %1$s</string>
+    <string name="section_collapsed_format">▸  %1$s</string>
+
+    <string name="menu_icon">☰</string>
+
     <string name="copy">Copy</string>
     <string name="quick_colours">Quick colours</string>
     <string name="hex_colour">HEX colour</string>
@@ -46,6 +65,7 @@
 
     <string name="colour_dialog_title">%1$s colour</string>
 
+    <string name="about_title">Modern Clock - %1$s</string>
     <string name="about_description">A minimalist Android clock widget inspired by KDE Modern Clock.</string>
 
     <string name="created_by">Created by</string>

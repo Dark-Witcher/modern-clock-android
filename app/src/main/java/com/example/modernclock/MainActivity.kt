@@ -1,6 +1,7 @@
 package com.example.modernclock
 
 import android.app.AlertDialog
+import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -8,6 +9,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -16,23 +18,34 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.ScrollView
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.edit
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.max
@@ -72,6 +85,42 @@ class MainActivity : AppCompatActivity() {
         private const val KEY_DAY_LETTER_SPACING =
             "day_letter_spacing"
 
+        private const val KEY_DAY_FONT_SIZE =
+            "day_font_size"
+
+        private const val KEY_DATE_FONT_SIZE =
+            "date_font_size"
+
+        private const val KEY_TIME_FONT_SIZE =
+            "time_font_size"
+
+        private const val KEY_DAY_SHADOW_ENABLED =
+            "day_shadow_enabled"
+
+        private const val KEY_DAY_SHADOW_COLOR =
+            "day_shadow_color"
+
+        private const val KEY_DATE_SHADOW_ENABLED =
+            "date_shadow_enabled"
+
+        private const val KEY_DATE_SHADOW_COLOR =
+            "date_shadow_color"
+
+        private const val KEY_TIME_SHADOW_ENABLED =
+            "time_shadow_enabled"
+
+        private const val KEY_TIME_SHADOW_COLOR =
+            "time_shadow_color"
+
+        private const val KEY_DAY_SECTION_EXPANDED =
+            "day_section_expanded"
+
+        private const val KEY_DATE_SECTION_EXPANDED =
+            "date_section_expanded"
+
+        private const val KEY_TIME_SECTION_EXPANDED =
+            "time_section_expanded"
+
         private const val DEFAULT_TIME_FORMAT =
             "HH:mm"
 
@@ -81,8 +130,20 @@ class MainActivity : AppCompatActivity() {
         private const val DEFAULT_COLOR =
             "#FFFFFF"
 
+        private const val DEFAULT_SHADOW_COLOR =
+            "#000000"
+
         private const val DEFAULT_DAY_LETTER_SPACING =
             17f
+
+        private const val DEFAULT_FONT_SIZE_PERCENT =
+            100
+
+        private const val MIN_FONT_SIZE_PERCENT =
+            50
+
+        private const val MAX_FONT_SIZE_PERCENT =
+            200
 
         fun saveGlobalTimeFormat(
             context: Context,
@@ -222,6 +283,348 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
+        fun saveGlobalDayFontSize(
+            context: Context,
+            sizePercent: Int
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putInt(
+                    KEY_DAY_FONT_SIZE,
+                    sizePercent.coerceIn(
+                        MIN_FONT_SIZE_PERCENT,
+                        MAX_FONT_SIZE_PERCENT
+                    )
+                )
+            }
+        }
+
+        fun getGlobalDayFontSize(
+            context: Context
+        ): Int {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getInt(
+                KEY_DAY_FONT_SIZE,
+                DEFAULT_FONT_SIZE_PERCENT
+            ).coerceIn(
+                MIN_FONT_SIZE_PERCENT,
+                MAX_FONT_SIZE_PERCENT
+            )
+        }
+
+        fun saveGlobalDateFontSize(
+            context: Context,
+            sizePercent: Int
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putInt(
+                    KEY_DATE_FONT_SIZE,
+                    sizePercent.coerceIn(
+                        MIN_FONT_SIZE_PERCENT,
+                        MAX_FONT_SIZE_PERCENT
+                    )
+                )
+            }
+        }
+
+        fun getGlobalDateFontSize(
+            context: Context
+        ): Int {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getInt(
+                KEY_DATE_FONT_SIZE,
+                DEFAULT_FONT_SIZE_PERCENT
+            ).coerceIn(
+                MIN_FONT_SIZE_PERCENT,
+                MAX_FONT_SIZE_PERCENT
+            )
+        }
+
+        fun saveGlobalTimeFontSize(
+            context: Context,
+            sizePercent: Int
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putInt(
+                    KEY_TIME_FONT_SIZE,
+                    sizePercent.coerceIn(
+                        MIN_FONT_SIZE_PERCENT,
+                        MAX_FONT_SIZE_PERCENT
+                    )
+                )
+            }
+        }
+
+        fun getGlobalTimeFontSize(
+            context: Context
+        ): Int {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getInt(
+                KEY_TIME_FONT_SIZE,
+                DEFAULT_FONT_SIZE_PERCENT
+            ).coerceIn(
+                MIN_FONT_SIZE_PERCENT,
+                MAX_FONT_SIZE_PERCENT
+            )
+        }
+
+        fun saveGlobalDayShadowEnabled(
+            context: Context,
+            enabled: Boolean
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putBoolean(
+                    KEY_DAY_SHADOW_ENABLED,
+                    enabled
+                )
+            }
+        }
+
+        fun getGlobalDayShadowEnabled(
+            context: Context
+        ): Boolean {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getBoolean(
+                KEY_DAY_SHADOW_ENABLED,
+                true
+            )
+        }
+
+        fun saveGlobalDayShadowColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_DAY_SHADOW_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalDayShadowColor(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_DAY_SHADOW_COLOR,
+                DEFAULT_SHADOW_COLOR
+            ) ?: DEFAULT_SHADOW_COLOR
+        }
+
+        fun saveGlobalDateShadowEnabled(
+            context: Context,
+            enabled: Boolean
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putBoolean(
+                    KEY_DATE_SHADOW_ENABLED,
+                    enabled
+                )
+            }
+        }
+
+        fun getGlobalDateShadowEnabled(
+            context: Context
+        ): Boolean {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getBoolean(
+                KEY_DATE_SHADOW_ENABLED,
+                true
+            )
+        }
+
+        fun saveGlobalDateShadowColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_DATE_SHADOW_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalDateShadowColor(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_DATE_SHADOW_COLOR,
+                DEFAULT_SHADOW_COLOR
+            ) ?: DEFAULT_SHADOW_COLOR
+        }
+
+        fun saveGlobalTimeShadowEnabled(
+            context: Context,
+            enabled: Boolean
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putBoolean(
+                    KEY_TIME_SHADOW_ENABLED,
+                    enabled
+                )
+            }
+        }
+
+        fun getGlobalTimeShadowEnabled(
+            context: Context
+        ): Boolean {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getBoolean(
+                KEY_TIME_SHADOW_ENABLED,
+                true
+            )
+        }
+
+        fun saveGlobalTimeShadowColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_TIME_SHADOW_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalTimeShadowColor(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_TIME_SHADOW_COLOR,
+                DEFAULT_SHADOW_COLOR
+            ) ?: DEFAULT_SHADOW_COLOR
+        }
+
+        fun saveGlobalDaySectionExpanded(
+            context: Context,
+            expanded: Boolean
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putBoolean(
+                    KEY_DAY_SECTION_EXPANDED,
+                    expanded
+                )
+            }
+        }
+
+        fun getGlobalDaySectionExpanded(
+            context: Context
+        ): Boolean {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getBoolean(
+                KEY_DAY_SECTION_EXPANDED,
+                false
+            )
+        }
+
+        fun saveGlobalDateSectionExpanded(
+            context: Context,
+            expanded: Boolean
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putBoolean(
+                    KEY_DATE_SECTION_EXPANDED,
+                    expanded
+                )
+            }
+        }
+
+        fun getGlobalDateSectionExpanded(
+            context: Context
+        ): Boolean {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getBoolean(
+                KEY_DATE_SECTION_EXPANDED,
+                false
+            )
+        }
+
+        fun saveGlobalTimeSectionExpanded(
+            context: Context,
+            expanded: Boolean
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putBoolean(
+                    KEY_TIME_SECTION_EXPANDED,
+                    expanded
+                )
+            }
+        }
+
+        fun getGlobalTimeSectionExpanded(
+            context: Context
+        ): Boolean {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getBoolean(
+                KEY_TIME_SECTION_EXPANDED,
+                false
+            )
+        }
+
         fun isTrueBlackEnabled(
             context: Context
         ): Boolean {
@@ -331,11 +734,35 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dateColorSwatch: View
     private lateinit var timeColorSwatch: View
 
+    private lateinit var dayShadowSwitch: SwitchCompat
+    private lateinit var dateShadowSwitch: SwitchCompat
+    private lateinit var timeShadowSwitch: SwitchCompat
+
+    private lateinit var dayShadowColorValue: TextView
+    private lateinit var dateShadowColorValue: TextView
+    private lateinit var timeShadowColorValue: TextView
+
+    private lateinit var dayShadowColorSwatch: View
+    private lateinit var dateShadowColorSwatch: View
+    private lateinit var timeShadowColorSwatch: View
+
+    private lateinit var dayFontSizeControl: FontSizeControl
+    private lateinit var dateFontSizeControl: FontSizeControl
+    private lateinit var timeFontSizeControl: FontSizeControl
+
+    private var updatingFontSizeControls =
+        false
+
     override fun onCreate(
         savedInstanceState: Bundle?
     ) {
         super.onCreate(
             savedInstanceState
+        )
+
+        WindowCompat.setDecorFitsSystemWindows(
+            window,
+            false
         )
 
         createInterface()
@@ -346,6 +773,7 @@ class MainActivity : AppCompatActivity() {
 
         if (::root.isInitialized) {
             applyTrueBlackBackground()
+            applyPreviewWallpaper()
         }
     }
 
@@ -354,6 +782,7 @@ class MainActivity : AppCompatActivity() {
         val scrollView =
             ScrollView(this).apply {
                 isFillViewport = true
+                clipToPadding = false
             }
 
         root =
@@ -371,6 +800,46 @@ class MainActivity : AppCompatActivity() {
                     32
                 )
             }
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+            scrollView
+        ) { _, insets ->
+
+            val systemBars =
+                insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars()
+                )
+
+            val ime =
+                insets.getInsets(
+                    WindowInsetsCompat.Type.ime()
+                )
+
+            val bottomInset =
+                max(
+                    systemBars.bottom,
+                    ime.bottom
+                )
+
+            root.setPadding(
+                32,
+                48 + systemBars.top,
+                32,
+                32 + bottomInset
+            )
+
+            if (
+                ime.bottom > 0
+            ) {
+                scrollView.post {
+                    scrollFocusedFieldIntoView(
+                        scrollView
+                    )
+                }
+            }
+
+            insets
+        }
 
         scrollView.addView(
             root,
@@ -422,7 +891,9 @@ class MainActivity : AppCompatActivity() {
             TextView(this).apply {
 
                 text =
-                    "☰"
+                    getString(
+                        R.string.menu_icon
+                    )
 
                 textSize =
                     28f
@@ -440,7 +911,7 @@ class MainActivity : AppCompatActivity() {
                     16,
                     8,
                     8,
-                    8
+                    0
                 )
 
                 setOnClickListener { view ->
@@ -559,10 +1030,6 @@ class MainActivity : AppCompatActivity() {
 
                 scaleType =
                     ImageView.ScaleType.FIT_CENTER
-
-                setBackgroundColor(
-                    Color.BLACK
-                )
             }
 
         root.addView(
@@ -573,6 +1040,60 @@ class MainActivity : AppCompatActivity() {
             ).apply {
                 topMargin =
                     12
+            }
+        )
+
+        applyPreviewWallpaper()
+
+        val wallpaperButton =
+            Button(this).apply {
+
+                text =
+                    if (
+                        Environment.isExternalStorageManager()
+                    ) {
+                        "Use current wallpaper"
+                    } else {
+                        "Use wallpaper for preview"
+                    }
+
+                isAllCaps =
+                    false
+
+                setOnClickListener {
+
+                    if (
+                        Environment.isExternalStorageManager()
+                    ) {
+
+                        applyPreviewWallpaper()
+
+                    } else {
+
+                        val intent =
+                            Intent(
+                                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+                            ).apply {
+                                data =
+                                    "package:$packageName"
+                                        .toUri()
+                            }
+
+                        startActivity(
+                            intent
+                        )
+                    }
+                }
+            }
+
+        root.addView(
+            wallpaperButton,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    8
             }
         )
 
@@ -599,33 +1120,44 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        val dayTitle =
-            TextView(this).apply {
+        /*
+         * =====================================================
+         * DAY
+         * =====================================================
+         */
 
-                text =
+        val daySection =
+            createExpandableSection(
+                title =
                     getString(
                         R.string.day_settings
+                    ),
+                initiallyExpanded =
+                    getGlobalDaySectionExpanded(
+                        this
+                    ),
+                onExpandedChanged = { expanded ->
+
+                    saveGlobalDaySectionExpanded(
+                        this,
+                        expanded
                     )
-
-                textSize =
-                    16f
-
-                setTypeface(
-                    null,
-                    Typeface.BOLD
-                )
-            }
+                }
+            )
 
         root.addView(
-            dayTitle,
+            daySection.first,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    16
+                    12
             }
         )
+
+        val dayContent =
+            daySection.second
 
         showDaySwitch =
             SwitchCompat(this).apply {
@@ -644,14 +1176,14 @@ class MainActivity : AppCompatActivity() {
                     )
             }
 
-        root.addView(
+        dayContent.addView(
             showDaySwitch,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    8
+                    4
             }
         )
 
@@ -672,14 +1204,14 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-        root.addView(
+        dayContent.addView(
             daySpacingLabel,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    16
+                    12
             }
         )
 
@@ -714,14 +1246,14 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-        root.addView(
+        dayContent.addView(
             dayLetterSpacingInput,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    8
+                    4
             }
         )
 
@@ -737,14 +1269,39 @@ class MainActivity : AppCompatActivity() {
                     13f
             }
 
-        root.addView(
+        dayContent.addView(
             daySpacingHelp,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    6
+                    4
+            }
+        )
+
+        dayFontSizeControl =
+            createFontSizeControl(
+                label =
+                    getString(
+                        R.string.day_font_size
+                    ),
+                initialValue =
+                    getGlobalDayFontSize(
+                        this
+                    ),
+                element =
+                    ModernClockWidget.FontSizeElement.DAY
+            )
+
+        dayContent.addView(
+            dayFontSizeControl.container,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    12
             }
         )
 
@@ -800,7 +1357,7 @@ class MainActivity : AppCompatActivity() {
         dayColorValue =
             dayColorRow.second
 
-        root.addView(
+        dayContent.addView(
             dayColorRow.first,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -811,33 +1368,135 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        val dateTitle =
-            TextView(this).apply {
+        dayShadowSwitch =
+            SwitchCompat(this).apply {
 
                 text =
                     getString(
-                        R.string.date_settings
+                        R.string.shadow
                     )
 
                 textSize =
                     16f
 
-                setTypeface(
-                    null,
-                    Typeface.BOLD
-                )
+                isChecked =
+                    getGlobalDayShadowEnabled(
+                        this@MainActivity
+                    )
             }
 
-        root.addView(
-            dateTitle,
+        dayContent.addView(
+            dayShadowSwitch,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    24
+                    4
             }
         )
+
+        dayShadowColorSwatch =
+            createColorSwatch(
+                getGlobalDayShadowColor(this)
+            )
+
+        val dayShadowColorRow =
+            createColorRow(
+                label =
+                    getString(
+                        R.string.shadow_colour
+                    ),
+                color =
+                    getGlobalDayShadowColor(this),
+                swatch =
+                    dayShadowColorSwatch,
+                onClick = {
+
+                    showColorPicker(
+                        elementName =
+                            getString(
+                                R.string.day_shadow
+                            ),
+                        currentColor =
+                            getGlobalDayShadowColor(
+                                this
+                            ),
+                        saveColor = { color ->
+
+                            saveGlobalDayShadowColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+
+                            dayShadowColorValue.text =
+                                color
+
+                            dayShadowColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        dayShadowColorValue =
+            dayShadowColorRow.second
+
+        dayContent.addView(
+            dayShadowColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
+        /*
+         * =====================================================
+         * DATE
+         * =====================================================
+         */
+
+        val dateSection =
+            createExpandableSection(
+                title =
+                    getString(
+                        R.string.date_settings
+                    ),
+                initiallyExpanded =
+                    getGlobalDateSectionExpanded(
+                        this
+                    ),
+                onExpandedChanged = { expanded ->
+
+                    saveGlobalDateSectionExpanded(
+                        this,
+                        expanded
+                    )
+                }
+            )
+
+        root.addView(
+            dateSection.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    8
+            }
+        )
+
+        val dateContent =
+            dateSection.second
 
         dateFormatInput =
             EditText(this).apply {
@@ -866,14 +1525,14 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-        root.addView(
+        dateContent.addView(
             dateFormatInput,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    8
+                    4
             }
         )
 
@@ -889,14 +1548,39 @@ class MainActivity : AppCompatActivity() {
                     13f
             }
 
-        root.addView(
+        dateContent.addView(
             dateFormatHelp,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    6
+                    4
+            }
+        )
+
+        dateFontSizeControl =
+            createFontSizeControl(
+                label =
+                    getString(
+                        R.string.date_font_size
+                    ),
+                initialValue =
+                    getGlobalDateFontSize(
+                        this
+                    ),
+                element =
+                    ModernClockWidget.FontSizeElement.DATE
+            )
+
+        dateContent.addView(
+            dateFontSizeControl.container,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    12
             }
         )
 
@@ -952,44 +1636,146 @@ class MainActivity : AppCompatActivity() {
         dateColorValue =
             dateColorRow.second
 
-        root.addView(
+        dateContent.addView(
             dateColorRow.first,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    16
+                    8
             }
         )
 
-        val timeTitle =
-            TextView(this).apply {
+        dateShadowSwitch =
+            SwitchCompat(this).apply {
 
                 text =
                     getString(
-                        R.string.time_settings
+                        R.string.shadow
                     )
 
                 textSize =
                     16f
 
-                setTypeface(
-                    null,
-                    Typeface.BOLD
-                )
+                isChecked =
+                    getGlobalDateShadowEnabled(
+                        this@MainActivity
+                    )
             }
 
-        root.addView(
-            timeTitle,
+        dateContent.addView(
+            dateShadowSwitch,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    24
+                    4
             }
         )
+
+        dateShadowColorSwatch =
+            createColorSwatch(
+                getGlobalDateShadowColor(this)
+            )
+
+        val dateShadowColorRow =
+            createColorRow(
+                label =
+                    getString(
+                        R.string.shadow_colour
+                    ),
+                color =
+                    getGlobalDateShadowColor(this),
+                swatch =
+                    dateShadowColorSwatch,
+                onClick = {
+
+                    showColorPicker(
+                        elementName =
+                            getString(
+                                R.string.date_shadow
+                            ),
+                        currentColor =
+                            getGlobalDateShadowColor(
+                                this
+                            ),
+                        saveColor = { color ->
+
+                            saveGlobalDateShadowColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+
+                            dateShadowColorValue.text =
+                                color
+
+                            dateShadowColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        dateShadowColorValue =
+            dateShadowColorRow.second
+
+        dateContent.addView(
+            dateShadowColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
+        /*
+         * =====================================================
+         * TIME
+         * =====================================================
+         */
+
+        val timeSection =
+            createExpandableSection(
+                title =
+                    getString(
+                        R.string.time_settings
+                    ),
+                initiallyExpanded =
+                    getGlobalTimeSectionExpanded(
+                        this
+                    ),
+                onExpandedChanged = { expanded ->
+
+                    saveGlobalTimeSectionExpanded(
+                        this,
+                        expanded
+                    )
+                }
+            )
+
+        root.addView(
+            timeSection.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    8
+            }
+        )
+
+        val timeContent =
+            timeSection.second
 
         timeFormatInput =
             EditText(this).apply {
@@ -1018,14 +1804,14 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-        root.addView(
+        timeContent.addView(
             timeFormatInput,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    8
+                    4
             }
         )
 
@@ -1041,14 +1827,39 @@ class MainActivity : AppCompatActivity() {
                     13f
             }
 
-        root.addView(
+        timeContent.addView(
             timeFormatHelp,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    6
+                    4
+            }
+        )
+
+        timeFontSizeControl =
+            createFontSizeControl(
+                label =
+                    getString(
+                        R.string.time_font_size
+                    ),
+                initialValue =
+                    getGlobalTimeFontSize(
+                        this
+                    ),
+                element =
+                    ModernClockWidget.FontSizeElement.TIME
+            )
+
+        timeContent.addView(
+            timeFontSizeControl.container,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    12
             }
         )
 
@@ -1104,16 +1915,113 @@ class MainActivity : AppCompatActivity() {
         timeColorValue =
             timeColorRow.second
 
-        root.addView(
+        timeContent.addView(
             timeColorRow.first,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
                 topMargin =
-                    16
+                    8
             }
         )
+
+        timeShadowSwitch =
+            SwitchCompat(this).apply {
+
+                text =
+                    getString(
+                        R.string.shadow
+                    )
+
+                textSize =
+                    16f
+
+                isChecked =
+                    getGlobalTimeShadowEnabled(
+                        this@MainActivity
+                    )
+            }
+
+        timeContent.addView(
+            timeShadowSwitch,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
+        timeShadowColorSwatch =
+            createColorSwatch(
+                getGlobalTimeShadowColor(this)
+            )
+
+        val timeShadowColorRow =
+            createColorRow(
+                label =
+                    getString(
+                        R.string.shadow_colour
+                    ),
+                color =
+                    getGlobalTimeShadowColor(this),
+                swatch =
+                    timeShadowColorSwatch,
+                onClick = {
+
+                    showColorPicker(
+                        elementName =
+                            getString(
+                                R.string.time_shadow
+                            ),
+                        currentColor =
+                            getGlobalTimeShadowColor(
+                                this
+                            ),
+                        saveColor = { color ->
+
+                            saveGlobalTimeShadowColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+
+                            timeShadowColorValue.text =
+                                color
+
+                            timeShadowColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        timeShadowColorValue =
+            timeShadowColorRow.second
+
+        timeContent.addView(
+            timeShadowColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
+        /*
+         * =====================================================
+         * LISTENERS
+         * =====================================================
+         */
 
         showDaySwitch.setOnCheckedChangeListener {
                 _,
@@ -1128,8 +2036,47 @@ class MainActivity : AppCompatActivity() {
             updatePreview()
         }
 
+        dayShadowSwitch.setOnCheckedChangeListener {
+                _,
+                checked ->
+
+            saveGlobalDayShadowEnabled(
+                this,
+                checked
+            )
+
+            updateAllWidgets()
+            updatePreview()
+        }
+
+        dateShadowSwitch.setOnCheckedChangeListener {
+                _,
+                checked ->
+
+            saveGlobalDateShadowEnabled(
+                this,
+                checked
+            )
+
+            updateAllWidgets()
+            updatePreview()
+        }
+
+        timeShadowSwitch.setOnCheckedChangeListener {
+                _,
+                checked ->
+
+            saveGlobalTimeShadowEnabled(
+                this,
+                checked
+            )
+
+            updateAllWidgets()
+            updatePreview()
+        }
+
         dayLetterSpacingInput.addTextChangedListener(
-            object : android.text.TextWatcher {
+            object : TextWatcher {
 
                 override fun beforeTextChanged(
                     s: CharSequence?,
@@ -1168,7 +2115,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun afterTextChanged(
-                    s: android.text.Editable?
+                    s: Editable?
                 ) {
                 }
             }
@@ -1203,11 +2150,18 @@ class MainActivity : AppCompatActivity() {
                 saveDayLetterSpacing()
                 updateAllWidgets()
                 updatePreview()
+
+            } else {
+
+                requestFieldVisibility(
+                    scrollView,
+                    dayLetterSpacingInput
+                )
             }
         }
 
         dateFormatInput.addTextChangedListener(
-            object : android.text.TextWatcher {
+            object : TextWatcher {
 
                 override fun beforeTextChanged(
                     s: CharSequence?,
@@ -1250,7 +2204,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun afterTextChanged(
-                    s: android.text.Editable?
+                    s: Editable?
                 ) {
                 }
             }
@@ -1285,11 +2239,18 @@ class MainActivity : AppCompatActivity() {
                 saveCustomDateFormat()
                 updateAllWidgets()
                 updatePreview()
+
+            } else {
+
+                requestFieldVisibility(
+                    scrollView,
+                    dateFormatInput
+                )
             }
         }
 
         timeFormatInput.addTextChangedListener(
-            object : android.text.TextWatcher {
+            object : TextWatcher {
 
                 override fun beforeTextChanged(
                     s: CharSequence?,
@@ -1332,7 +2293,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun afterTextChanged(
-                    s: android.text.Editable?
+                    s: Editable?
                 ) {
                 }
             }
@@ -1367,6 +2328,13 @@ class MainActivity : AppCompatActivity() {
                 saveCustomTimeFormat()
                 updateAllWidgets()
                 updatePreview()
+
+            } else {
+
+                requestFieldVisibility(
+                    scrollView,
+                    timeFormatInput
+                )
             }
         }
 
@@ -1374,8 +2342,793 @@ class MainActivity : AppCompatActivity() {
             scrollView
         )
 
+        ViewCompat.requestApplyInsets(
+            scrollView
+        )
+
         updatePreview()
         applyTrueBlackBackground()
+    }
+
+    private fun createExpandableSection(
+        title: String,
+        initiallyExpanded: Boolean,
+        onExpandedChanged: (Boolean) -> Unit
+    ): Pair<LinearLayout, LinearLayout> {
+
+        val section =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+            }
+
+        val header =
+            TextView(this).apply {
+
+                text =
+                    getString(
+                        if (initiallyExpanded) {
+                            R.string.section_expanded_format
+                        } else {
+                            R.string.section_collapsed_format
+                        },
+                        title
+                    )
+
+                textSize =
+                    17f
+
+                setTypeface(
+                    null,
+                    Typeface.BOLD
+                )
+
+                gravity =
+                    Gravity.CENTER_VERTICAL
+
+                setPadding(
+                    8,
+                    10,
+                    8,
+                    10
+                )
+
+                isClickable =
+                    true
+
+                isFocusable =
+                    true
+            }
+
+        val content =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+
+                isVisible =
+                    initiallyExpanded
+
+                setPadding(
+                    8,
+                    0,
+                    8,
+                    4
+                )
+            }
+
+        header.setOnClickListener {
+
+            val expanded =
+                content.isVisible
+
+            content.isVisible =
+                !expanded
+
+            header.text =
+                getString(
+                    if (expanded) {
+                        R.string.section_collapsed_format
+                    } else {
+                        R.string.section_expanded_format
+                    },
+                    title
+                )
+
+            onExpandedChanged(
+                !expanded
+            )
+        }
+
+        section.addView(
+            header,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+
+        section.addView(
+            content,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+
+        return Pair(
+            section,
+            content
+        )
+    }
+
+    private inner class FontSizeControl(
+        val container: LinearLayout,
+        private val seekBar: SeekBar
+    ) {
+
+        fun setValue(
+            value: Int
+        ) {
+
+            val safeValue =
+                value.coerceIn(
+                    MIN_FONT_SIZE_PERCENT,
+                    MAX_FONT_SIZE_PERCENT
+                )
+
+            updatingFontSizeControls =
+                true
+
+            seekBar.progress =
+                safeValue -
+                        MIN_FONT_SIZE_PERCENT
+
+            updatingFontSizeControls =
+                false
+        }
+    }
+
+    private fun createFontSizeControl(
+        label: String,
+        initialValue: Int,
+        element: ModernClockWidget.FontSizeElement
+    ): FontSizeControl {
+
+        val container =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+            }
+
+        val labelView =
+            TextView(this).apply {
+
+                text =
+                    label
+
+                textSize =
+                    16f
+
+                setTypeface(
+                    null,
+                    Typeface.BOLD
+                )
+            }
+
+        container.addView(
+            labelView
+        )
+
+        val seekBar =
+            SeekBar(this).apply {
+
+                max =
+                    MAX_FONT_SIZE_PERCENT -
+                            MIN_FONT_SIZE_PERCENT
+
+                progress =
+                    (
+                            initialValue -
+                                    MIN_FONT_SIZE_PERCENT
+                            ).coerceIn(
+                            0,
+                            max
+                        )
+
+                setOnSeekBarChangeListener(
+                    object :
+                        SeekBar.OnSeekBarChangeListener {
+
+                        override fun onProgressChanged(
+                            seekBar: SeekBar,
+                            progress: Int,
+                            fromUser: Boolean
+                        ) {
+
+                            val value =
+                                progress +
+                                        MIN_FONT_SIZE_PERCENT
+
+                            if (
+                                fromUser &&
+                                !updatingFontSizeControls
+                            ) {
+
+                                handleFontSizeChange(
+                                    element,
+                                    value
+                                )
+                            }
+                        }
+
+                        override fun onStartTrackingTouch(
+                            seekBar: SeekBar
+                        ) {
+                        }
+
+                        override fun onStopTrackingTouch(
+                            seekBar: SeekBar
+                        ) {
+                        }
+                    }
+                )
+            }
+
+        container.addView(
+            seekBar,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
+        val rangeLabels =
+            LinearLayout(this).apply {
+
+                orientation =
+                    LinearLayout.HORIZONTAL
+
+                gravity =
+                    Gravity.CENTER_VERTICAL
+            }
+
+        val smallerLabel =
+            TextView(this).apply {
+
+                text =
+                    getString(
+                        R.string.smaller
+                    )
+
+                textSize =
+                    13f
+
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        0,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        1f
+                    )
+            }
+
+        val largerLabel =
+            TextView(this).apply {
+
+                text =
+                    getString(
+                        R.string.larger
+                    )
+
+                textSize =
+                    13f
+
+                gravity =
+                    Gravity.END
+
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        0,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        1f
+                    )
+            }
+
+        rangeLabels.addView(
+            smallerLabel
+        )
+
+        rangeLabels.addView(
+            largerLabel
+        )
+
+        container.addView(
+            rangeLabels
+        )
+
+        val resetButton =
+            Button(this).apply {
+
+                text =
+                    getString(
+                        R.string.reset_to_default
+                    )
+
+                textSize =
+                    14f
+
+                isAllCaps =
+                    false
+
+                setOnClickListener {
+
+                    handleFontSizeChange(
+                        element,
+                        DEFAULT_FONT_SIZE_PERCENT
+                    )
+                }
+            }
+
+        val resetButtonContainer =
+            FrameLayout(this)
+
+        resetButtonContainer.addView(
+            resetButton,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER
+            )
+        )
+
+        container.addView(
+            resetButtonContainer,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    2
+            }
+        )
+
+        return FontSizeControl(
+            container = container,
+            seekBar = seekBar
+        )
+    }
+
+    private fun handleFontSizeChange(
+        changedElement: ModernClockWidget.FontSizeElement,
+        requestedValue: Int
+    ) {
+
+        var requestedDay =
+            getGlobalDayFontSize(
+                this
+            )
+
+        var requestedDate =
+            getGlobalDateFontSize(
+                this
+            )
+
+        var requestedTime =
+            getGlobalTimeFontSize(
+                this
+            )
+
+        when (
+            changedElement
+        ) {
+
+            ModernClockWidget.FontSizeElement.DAY -> {
+                requestedDay =
+                    requestedValue
+            }
+
+            ModernClockWidget.FontSizeElement.DATE -> {
+                requestedDate =
+                    requestedValue
+            }
+
+            ModernClockWidget.FontSizeElement.TIME -> {
+                requestedTime =
+                    requestedValue
+            }
+        }
+
+        val appWidgetManager =
+            AppWidgetManager.getInstance(
+                this
+            )
+
+        val componentName =
+            ComponentName(
+                this,
+                ModernClockWidget::class.java
+            )
+
+        val widgetIds =
+            appWidgetManager.getAppWidgetIds(
+                componentName
+            )
+
+        var fittedSizes =
+            ModernClockWidget.FontSizeValues(
+                day = requestedDay,
+                date = requestedDate,
+                time = requestedTime
+            )
+
+        if (
+            widgetIds.isNotEmpty()
+        ) {
+
+            for (
+            widgetId in widgetIds
+            ) {
+
+                val options =
+                    appWidgetManager.getAppWidgetOptions(
+                        widgetId
+                    )
+
+                val widthDp =
+                    options.getInt(
+                        AppWidgetManager
+                            .OPTION_APPWIDGET_MIN_WIDTH,
+                        180
+                    )
+
+                val heightDp =
+                    options.getInt(
+                        AppWidgetManager
+                            .OPTION_APPWIDGET_MIN_HEIGHT,
+                        40
+                    )
+
+                val candidate =
+                    ModernClockWidget.calculateFittedFontSizes(
+                        context = this,
+                        widthDp = widthDp,
+                        heightDp = heightDp,
+                        timeFormat =
+                            getGlobalTimeFormat(
+                                this
+                            ),
+                        dateFormat =
+                            getGlobalDateFormat(
+                                this
+                            ),
+                        showDay =
+                            getGlobalShowDay(
+                                this
+                            ),
+                        dayLetterSpacing =
+                            getGlobalDayLetterSpacing(
+                                this
+                            ),
+                        requestedDaySizePercent =
+                            requestedDay,
+                        requestedDateSizePercent =
+                            requestedDate,
+                        requestedTimeSizePercent =
+                            requestedTime,
+                        changedElement =
+                            changedElement
+                    )
+
+                fittedSizes =
+                    ModernClockWidget.FontSizeValues(
+                        day =
+                            minOf(
+                                fittedSizes.day,
+                                candidate.day
+                            ),
+                        date =
+                            minOf(
+                                fittedSizes.date,
+                                candidate.date
+                            ),
+                        time =
+                            minOf(
+                                fittedSizes.time,
+                                candidate.time
+                            )
+                    )
+            }
+
+        } else {
+
+            val density =
+                resources.displayMetrics.density
+
+            val previewWidthDp =
+                max(
+                    1,
+                    (preview.width / density).toInt()
+                )
+
+            val previewHeightDp =
+                max(
+                    1,
+                    (preview.height / density).toInt()
+                )
+
+            fittedSizes =
+                ModernClockWidget.calculateFittedFontSizes(
+                    context = this,
+                    widthDp = previewWidthDp,
+                    heightDp = previewHeightDp,
+                    timeFormat =
+                        getGlobalTimeFormat(
+                            this
+                        ),
+                    dateFormat =
+                        getGlobalDateFormat(
+                            this
+                        ),
+                    showDay =
+                        getGlobalShowDay(
+                            this
+                        ),
+                    dayLetterSpacing =
+                        getGlobalDayLetterSpacing(
+                            this
+                        ),
+                    requestedDaySizePercent =
+                        requestedDay,
+                    requestedDateSizePercent =
+                        requestedDate,
+                    requestedTimeSizePercent =
+                        requestedTime,
+                    changedElement =
+                        changedElement
+                )
+        }
+
+        saveFittedFontSizes(
+            fittedSizes
+        )
+
+        updateFontSizeControls(
+            fittedSizes
+        )
+
+        updateAllWidgets()
+        updatePreview()
+    }
+
+    private fun saveFittedFontSizes(
+        values: ModernClockWidget.FontSizeValues
+    ) {
+
+        saveGlobalDayFontSize(
+            this,
+            values.day
+        )
+
+        saveGlobalDateFontSize(
+            this,
+            values.date
+        )
+
+        saveGlobalTimeFontSize(
+            this,
+            values.time
+        )
+    }
+
+    private fun updateFontSizeControls(
+        values: ModernClockWidget.FontSizeValues
+    ) {
+
+        if (
+            updatingFontSizeControls
+        ) {
+            return
+        }
+
+        dayFontSizeControl.setValue(
+            values.day
+        )
+
+        dateFontSizeControl.setValue(
+            values.date
+        )
+
+        timeFontSizeControl.setValue(
+            values.time
+        )
+    }
+
+    private fun getFittedPreviewFontSizes(): ModernClockWidget.FontSizeValues {
+
+        val density =
+            resources.displayMetrics.density
+
+        val previewWidthDp =
+            max(
+                1,
+                (preview.width / density).toInt()
+            )
+
+        val previewHeightDp =
+            max(
+                1,
+                (preview.height / density).toInt()
+            )
+
+        return ModernClockWidget.calculateFittedFontSizes(
+            context = this,
+            widthDp = previewWidthDp,
+            heightDp = previewHeightDp,
+            timeFormat =
+                timeFormatInput
+                    .text
+                    .toString()
+                    .trim()
+                    .ifBlank {
+                        DEFAULT_TIME_FORMAT
+                    },
+            dateFormat =
+                dateFormatInput
+                    .text
+                    .toString()
+                    .trim()
+                    .ifBlank {
+                        DEFAULT_DATE_FORMAT
+                    },
+            showDay =
+                showDaySwitch.isChecked,
+            dayLetterSpacing =
+                getGlobalDayLetterSpacing(
+                    this
+                ),
+            requestedDaySizePercent =
+                getGlobalDayFontSize(
+                    this
+                ),
+            requestedDateSizePercent =
+                getGlobalDateFontSize(
+                    this
+                ),
+            requestedTimeSizePercent =
+                getGlobalTimeFontSize(
+                    this
+                ),
+            changedElement =
+                null
+        )
+    }
+
+    private fun requestFieldVisibility(
+        scrollView: ScrollView,
+        field: EditText
+    ) {
+
+        scrollView.post {
+
+            scrollView.requestChildRectangleOnScreen(
+                field,
+                android.graphics.Rect(
+                    0,
+                    -32,
+                    field.width,
+                    field.height + 32
+                ),
+                true
+            )
+
+            scrollFocusedFieldIntoView(
+                scrollView
+            )
+        }
+
+        field.postDelayed(
+            {
+                scrollFocusedFieldIntoView(
+                    scrollView
+                )
+            },
+            300
+        )
+    }
+
+    private fun scrollFocusedFieldIntoView(
+        scrollView: ScrollView
+    ) {
+
+        val field =
+            currentFocus as? EditText
+                ?: return
+
+        if (
+            field.parent == null
+        ) {
+            return
+        }
+
+        val fieldLocation =
+            IntArray(2)
+
+        val scrollLocation =
+            IntArray(2)
+
+        field.getLocationOnScreen(
+            fieldLocation
+        )
+
+        scrollView.getLocationOnScreen(
+            scrollLocation
+        )
+
+        val fieldTop =
+            fieldLocation[1]
+
+        val fieldBottom =
+            fieldLocation[1] +
+                    field.height
+
+        val scrollTop =
+            scrollLocation[1] +
+                    16
+
+        val visibleBottom =
+            window.decorView.height -
+                    getBottomObscuredInset(
+                        scrollView
+                    ) -
+                    32
+
+        when {
+
+            fieldBottom > visibleBottom -> {
+
+                scrollView.scrollBy(
+                    0,
+                    fieldBottom -
+                            visibleBottom
+                )
+            }
+
+            fieldTop < scrollTop -> {
+
+                scrollView.scrollBy(
+                    0,
+                    fieldTop -
+                            scrollTop
+                )
+            }
+        }
+    }
+
+    private fun getBottomObscuredInset(
+        scrollView: ScrollView
+    ): Int {
+
+        val rootWindowInsets =
+            ViewCompat.getRootWindowInsets(
+                scrollView
+            ) ?: return 0
+
+        val ime =
+            rootWindowInsets.getInsets(
+                WindowInsetsCompat.Type.ime()
+            )
+
+        val systemBars =
+            rootWindowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+            )
+
+        return max(
+            ime.bottom,
+            systemBars.bottom
+        )
     }
 
     private fun formatSpacing(
@@ -1945,7 +3698,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         hexInput.addTextChangedListener(
-            object : android.text.TextWatcher {
+            object : TextWatcher {
 
                 override fun beforeTextChanged(
                     s: CharSequence?,
@@ -1985,7 +3738,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun afterTextChanged(
-                    s: android.text.Editable?
+                    s: Editable?
                 ) {
                 }
             }
@@ -2076,6 +3829,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         dialog.show()
+
+        /*
+         * When Dark Mode and True Black/OLED mode are both enabled,
+         * use a true #000000 background for the color picker dialog.
+         *
+         * Otherwise, the dialog keeps its existing themed background.
+         */
+        if (
+            isTrueBlackEnabled(this) &&
+            (
+                    resources.configuration.uiMode and
+                            Configuration.UI_MODE_NIGHT_MASK
+                    ) == Configuration.UI_MODE_NIGHT_YES
+        ) {
+            dialog.window?.setBackgroundDrawable(
+                Color.BLACK.toDrawable()
+            )
+        }
     }
 
     private fun colorToHex(
@@ -2244,6 +4015,56 @@ class MainActivity : AppCompatActivity() {
             saturation * 100f,
             lightness * 100f
         )
+    }
+
+    private fun applyPreviewWallpaper() {
+
+        preview.setBackgroundColor(
+            "#D0D0D0".toColorInt()
+        )
+
+        if (
+            !Environment.isExternalStorageManager()
+        ) {
+            return
+        }
+
+        val wallpaperManager =
+            getSystemService(
+                WallpaperManager::class.java
+            )
+
+        val wallpaperFile =
+            try {
+                wallpaperManager.getWallpaperFile(
+                    WallpaperManager.FLAG_SYSTEM
+                )
+            } catch (
+                _: Exception
+            ) {
+                null
+            }
+
+        if (
+            wallpaperFile == null
+        ) {
+            return
+        }
+
+        wallpaperFile.use { file ->
+
+            val bitmap =
+                BitmapFactory.decodeFileDescriptor(
+                    file.fileDescriptor
+                )
+
+            if (
+                bitmap != null
+            ) {
+
+                preview.background = bitmap.toDrawable(resources)
+            }
+        }
     }
 
     private fun applyTrueBlackBackground() {
@@ -2482,7 +4303,10 @@ class MainActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setTitle(
                     getString(
-                        R.string.app_name
+                        R.string.about_title,
+                        getString(
+                            R.string.app_version
+                        )
                     )
                 )
                 .setView(
@@ -2517,6 +4341,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         dialog.show()
+
+        /*
+         * When Dark Mode and True Black/OLED mode are both enabled,
+         * use a true #000000 background for the About dialog.
+         *
+         * Otherwise, the dialog keeps its existing themed background.
+         */
+        if (
+            isTrueBlackEnabled(this) &&
+            (
+                    resources.configuration.uiMode and
+                            Configuration.UI_MODE_NIGHT_MASK
+                    ) == Configuration.UI_MODE_NIGHT_YES
+        ) {
+            dialog.window?.setBackgroundDrawable(
+                Color.BLACK.toDrawable()
+            )
+        }
     }
 
     private fun isValidDateFormat(
@@ -2691,6 +4533,39 @@ class MainActivity : AppCompatActivity() {
             )
         ) {
             return
+        }
+
+        val fittedSizes =
+            getFittedPreviewFontSizes()
+
+        val currentDay =
+            getGlobalDayFontSize(
+                this
+            )
+
+        val currentDate =
+            getGlobalDateFontSize(
+                this
+            )
+
+        val currentTime =
+            getGlobalTimeFontSize(
+                this
+            )
+
+        if (
+            fittedSizes.day != currentDay ||
+            fittedSizes.date != currentDate ||
+            fittedSizes.time != currentTime
+        ) {
+
+            saveFittedFontSizes(
+                fittedSizes
+            )
+
+            updateFontSizeControls(
+                fittedSizes
+            )
         }
 
         preview.setImageBitmap(
