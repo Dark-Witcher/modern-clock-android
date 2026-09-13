@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/modern-clock-hero.png" alt="Modern Clock running on a Samsung Galaxy S23 Ultra" width="900">
+  <img src="docs/images/hero.png" alt="Modern Clock running on a Samsung Galaxy S23 Ultra" width="900">
 </p>
 
 Modern Clock brings the distinctive KDE Modern Clock aesthetic to Android as a native home-screen widget.
