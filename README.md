@@ -1,4 +1,4 @@
-# Modern Clock
+<div align="center"> # Modern Clock </div>
 
 > A minimalist, customizable Android home-screen clock widget inspired by KDE Modern Clock.
 
