@@ -19,6 +19,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Environment
+import android.os.PowerManager
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -82,6 +83,27 @@ class MainActivity : AppCompatActivity() {
         private const val KEY_TIME_COLOR =
             "time_color"
 
+        private const val KEY_WIDGET_APPEARANCE =
+            "widget_appearance"
+
+        private const val KEY_WIDGET_LIGHT_DAY_COLOR =
+            "widget_light_day_color"
+
+        private const val KEY_WIDGET_LIGHT_DATE_COLOR =
+            "widget_light_date_color"
+
+        private const val KEY_WIDGET_LIGHT_TIME_COLOR =
+            "widget_light_time_color"
+
+        private const val KEY_WIDGET_DARK_DAY_COLOR =
+            "widget_dark_day_color"
+
+        private const val KEY_WIDGET_DARK_DATE_COLOR =
+            "widget_dark_date_color"
+
+        private const val KEY_WIDGET_DARK_TIME_COLOR =
+            "widget_dark_time_color"
+
         private const val KEY_DAY_LETTER_SPACING =
             "day_letter_spacing"
 
@@ -111,6 +133,15 @@ class MainActivity : AppCompatActivity() {
 
         private const val KEY_TIME_SHADOW_COLOR =
             "time_shadow_color"
+
+        private const val KEY_WIDGET_DARK_DAY_SHADOW_COLOR =
+            "widget_dark_day_shadow_color"
+
+        private const val KEY_WIDGET_DARK_DATE_SHADOW_COLOR =
+            "widget_dark_date_shadow_color"
+
+        private const val KEY_WIDGET_DARK_TIME_SHADOW_COLOR =
+            "widget_dark_time_shadow_color"
 
         private const val KEY_DAY_SECTION_EXPANDED =
             "day_section_expanded"
@@ -637,7 +668,34 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        fun saveGlobalDayColor(
+        fun saveGlobalWidgetAppearance(
+            context: Context,
+            appearance: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_WIDGET_APPEARANCE,
+                    appearance
+                )
+            }
+        }
+
+        fun getGlobalWidgetAppearance(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_WIDGET_APPEARANCE,
+                "follow_system"
+            ) ?: "follow_system"
+        }
+
+        fun saveGlobalWidgetLightDayColor(
             context: Context,
             color: String
         ) {
@@ -645,6 +703,10 @@ class MainActivity : AppCompatActivity() {
                 PREFS_NAME,
                 MODE_PRIVATE
             ).edit {
+                putString(
+                    KEY_WIDGET_LIGHT_DAY_COLOR,
+                    color
+                )
                 putString(
                     KEY_DAY_COLOR,
                     color
@@ -652,19 +714,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fun getGlobalDayColor(
+        fun getGlobalWidgetLightDayColor(
             context: Context
         ): String {
-            return context.getSharedPreferences(
-                PREFS_NAME,
-                MODE_PRIVATE
-            ).getString(
+            val preferences =
+                context.getSharedPreferences(
+                    PREFS_NAME,
+                    MODE_PRIVATE
+                )
+
+            return preferences.getString(
+                KEY_WIDGET_LIGHT_DAY_COLOR,
+                null
+            ) ?: preferences.getString(
                 KEY_DAY_COLOR,
                 DEFAULT_COLOR
             ) ?: DEFAULT_COLOR
         }
 
-        fun saveGlobalDateColor(
+        fun saveGlobalWidgetLightDateColor(
             context: Context,
             color: String
         ) {
@@ -672,6 +740,10 @@ class MainActivity : AppCompatActivity() {
                 PREFS_NAME,
                 MODE_PRIVATE
             ).edit {
+                putString(
+                    KEY_WIDGET_LIGHT_DATE_COLOR,
+                    color
+                )
                 putString(
                     KEY_DATE_COLOR,
                     color
@@ -679,19 +751,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fun getGlobalDateColor(
+        fun getGlobalWidgetLightDateColor(
             context: Context
         ): String {
-            return context.getSharedPreferences(
-                PREFS_NAME,
-                MODE_PRIVATE
-            ).getString(
+            val preferences =
+                context.getSharedPreferences(
+                    PREFS_NAME,
+                    MODE_PRIVATE
+                )
+
+            return preferences.getString(
+                KEY_WIDGET_LIGHT_DATE_COLOR,
+                null
+            ) ?: preferences.getString(
                 KEY_DATE_COLOR,
                 DEFAULT_COLOR
             ) ?: DEFAULT_COLOR
         }
 
-        fun saveGlobalTimeColor(
+        fun saveGlobalWidgetLightTimeColor(
             context: Context,
             color: String
         ) {
@@ -700,22 +778,248 @@ class MainActivity : AppCompatActivity() {
                 MODE_PRIVATE
             ).edit {
                 putString(
+                    KEY_WIDGET_LIGHT_TIME_COLOR,
+                    color
+                )
+                putString(
                     KEY_TIME_COLOR,
                     color
                 )
             }
         }
 
-        fun getGlobalTimeColor(
+        fun getGlobalWidgetLightTimeColor(
+            context: Context
+        ): String {
+            val preferences =
+                context.getSharedPreferences(
+                    PREFS_NAME,
+                    MODE_PRIVATE
+                )
+
+            return preferences.getString(
+                KEY_WIDGET_LIGHT_TIME_COLOR,
+                null
+            ) ?: preferences.getString(
+                KEY_TIME_COLOR,
+                DEFAULT_COLOR
+            ) ?: DEFAULT_COLOR
+        }
+
+        fun saveGlobalWidgetDarkDayColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_WIDGET_DARK_DAY_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalWidgetDarkDayColor(
             context: Context
         ): String {
             return context.getSharedPreferences(
                 PREFS_NAME,
                 MODE_PRIVATE
             ).getString(
-                KEY_TIME_COLOR,
+                KEY_WIDGET_DARK_DAY_COLOR,
                 DEFAULT_COLOR
             ) ?: DEFAULT_COLOR
+        }
+
+        fun saveGlobalWidgetDarkDateColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_WIDGET_DARK_DATE_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalWidgetDarkDateColor(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_WIDGET_DARK_DATE_COLOR,
+                DEFAULT_COLOR
+            ) ?: DEFAULT_COLOR
+        }
+
+        fun saveGlobalWidgetDarkTimeColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_WIDGET_DARK_TIME_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalWidgetDarkTimeColor(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_WIDGET_DARK_TIME_COLOR,
+                DEFAULT_COLOR
+            ) ?: DEFAULT_COLOR
+        }
+
+        fun saveGlobalWidgetDarkDayShadowColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_WIDGET_DARK_DAY_SHADOW_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalWidgetDarkDayShadowColor(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_WIDGET_DARK_DAY_SHADOW_COLOR,
+                DEFAULT_SHADOW_COLOR
+            ) ?: DEFAULT_SHADOW_COLOR
+        }
+
+        fun saveGlobalWidgetDarkDateShadowColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_WIDGET_DARK_DATE_SHADOW_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalWidgetDarkDateShadowColor(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_WIDGET_DARK_DATE_SHADOW_COLOR,
+                DEFAULT_SHADOW_COLOR
+            ) ?: DEFAULT_SHADOW_COLOR
+        }
+
+        fun saveGlobalWidgetDarkTimeShadowColor(
+            context: Context,
+            color: String
+        ) {
+            context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).edit {
+                putString(
+                    KEY_WIDGET_DARK_TIME_SHADOW_COLOR,
+                    color
+                )
+            }
+        }
+
+        fun getGlobalWidgetDarkTimeShadowColor(
+            context: Context
+        ): String {
+            return context.getSharedPreferences(
+                PREFS_NAME,
+                MODE_PRIVATE
+            ).getString(
+                KEY_WIDGET_DARK_TIME_SHADOW_COLOR,
+                DEFAULT_SHADOW_COLOR
+            ) ?: DEFAULT_SHADOW_COLOR
+        }
+
+        fun saveGlobalDayColor(
+            context: Context,
+            color: String
+        ) {
+            saveGlobalWidgetLightDayColor(
+                context,
+                color
+            )
+        }
+
+        fun getGlobalDayColor(
+            context: Context
+        ): String {
+            return getGlobalWidgetLightDayColor(
+                context
+            )
+        }
+
+        fun saveGlobalDateColor(
+            context: Context,
+            color: String
+        ) {
+            saveGlobalWidgetLightDateColor(
+                context,
+                color
+            )
+        }
+
+        fun getGlobalDateColor(
+            context: Context
+        ): String {
+            return getGlobalWidgetLightDateColor(
+                context
+            )
+        }
+
+        fun saveGlobalTimeColor(
+            context: Context,
+            color: String
+        ) {
+            saveGlobalWidgetLightTimeColor(
+                context,
+                color
+            )
+        }
+
+        fun getGlobalTimeColor(
+            context: Context
+        ): String {
+            return getGlobalWidgetLightTimeColor(
+                context
+            )
         }
     }
 
@@ -730,9 +1034,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dateColorValue: TextView
     private lateinit var timeColorValue: TextView
 
+    private lateinit var darkDayColorValue: TextView
+    private lateinit var darkDateColorValue: TextView
+    private lateinit var darkTimeColorValue: TextView
+
     private lateinit var dayColorSwatch: View
     private lateinit var dateColorSwatch: View
     private lateinit var timeColorSwatch: View
+
+    private lateinit var darkDayColorSwatch: View
+    private lateinit var darkDateColorSwatch: View
+    private lateinit var darkTimeColorSwatch: View
+
+    private lateinit var darkDayShadowColorValue: TextView
+    private lateinit var darkDateShadowColorValue: TextView
+    private lateinit var darkTimeShadowColorValue: TextView
+
+    private lateinit var darkDayShadowColorSwatch: View
+    private lateinit var darkDateShadowColorSwatch: View
+    private lateinit var darkTimeShadowColorSwatch: View
+
+    private lateinit var widgetAppearanceButton: Button
 
     private lateinit var dayShadowSwitch: SwitchCompat
     private lateinit var dateShadowSwitch: SwitchCompat
@@ -750,6 +1072,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dateFontSizeControl: FontSizeControl
     private lateinit var timeFontSizeControl: FontSizeControl
 
+    private lateinit var batteryUsageButton: Button
+
     private var updatingFontSizeControls =
         false
 
@@ -765,6 +1089,15 @@ class MainActivity : AppCompatActivity() {
             false
         )
 
+        if (
+            !intent.getBooleanExtra(
+                "opened_from_widget",
+                false
+            )
+        ) {
+            updateAllWidgets()
+        }
+
         createInterface()
     }
 
@@ -774,9 +1107,11 @@ class MainActivity : AppCompatActivity() {
         if (::root.isInitialized) {
             applyTrueBlackBackground()
             applyPreviewWallpaper()
+            updateBatteryUsageButton()
         }
     }
 
+    @Suppress("SetTextI18n")
     private fun createInterface() {
 
         val scrollView =
@@ -1045,6 +1380,24 @@ class MainActivity : AppCompatActivity() {
 
         applyPreviewWallpaper()
 
+        val permissionButtonRow =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
+
+                gravity =
+                    Gravity.CENTER
+
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        topMargin =
+                            8
+                    }
+            }
+
         val wallpaperButton =
             Button(this).apply {
 
@@ -1086,16 +1439,46 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-        root.addView(
+        permissionButtonRow.addView(
             wallpaperButton,
             LinearLayout.LayoutParams(
+                0,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                1f
             ).apply {
-                topMargin =
-                    8
+                rightMargin =
+                    4
             }
         )
+
+        batteryUsageButton =
+            Button(this).apply {
+
+                isAllCaps =
+                    false
+
+                setOnClickListener {
+                    requestBatteryUnrestricted()
+                }
+            }
+
+        permissionButtonRow.addView(
+            batteryUsageButton,
+            LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            ).apply {
+                leftMargin =
+                    4
+            }
+        )
+
+        root.addView(
+            permissionButtonRow
+        )
+
+        updateBatteryUsageButton()
 
         val settingsTitle =
             TextView(this).apply {
@@ -1120,11 +1503,146 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        /*
-         * =====================================================
-         * DAY
-         * =====================================================
-         */
+        val widgetAppearanceLabel =
+            TextView(this).apply {
+                text =
+                    "Widget appearance"
+
+                textSize =
+                    16f
+
+                setTypeface(
+                    null,
+                    Typeface.BOLD
+                )
+            }
+
+        root.addView(
+            widgetAppearanceLabel,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    16
+            }
+        )
+
+        widgetAppearanceButton =
+            Button(this).apply {
+                isAllCaps =
+                    false
+
+                updateWidgetAppearanceButtonText(this)
+
+                setOnClickListener {
+                    showWidgetAppearanceMenu(this)
+                }
+            }
+
+        root.addView(
+            widgetAppearanceButton,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
+        val colourTabRow =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
+
+                setPadding(
+                    4,
+                    4,
+                    4,
+                    4
+                )
+
+                background =
+                    GradientDrawable().apply {
+                        shape =
+                            GradientDrawable.RECTANGLE
+
+                        cornerRadius =
+                            16f
+
+                        setColor(
+                            Color.TRANSPARENT
+                        )
+
+                        setStroke(
+                            1,
+                            Color.GRAY
+                        )
+                    }
+            }
+
+        val lightColourTabButton =
+            Button(this).apply {
+                text =
+                    "☀ Light"
+                isAllCaps =
+                    false
+
+                setPadding(
+                    8,
+                    4,
+                    8,
+                    4
+                )
+            }
+
+        val darkColourTabButton =
+            Button(this).apply {
+                text =
+                    "☾ Dark"
+                isAllCaps =
+                    false
+
+                setPadding(
+                    8,
+                    4,
+                    8,
+                    4
+                )
+            }
+
+        colourTabRow.addView(
+            lightColourTabButton,
+            LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        )
+
+        colourTabRow.addView(
+            darkColourTabButton,
+            LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            ).apply {
+                leftMargin =
+                    4
+            }
+        )
+
+        root.addView(
+            colourTabRow,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    12
+            }
+        )
 
         val daySection =
             createExpandableSection(
@@ -1137,7 +1655,6 @@ class MainActivity : AppCompatActivity() {
                         this
                     ),
                 onExpandedChanged = { expanded ->
-
                     saveGlobalDaySectionExpanded(
                         this,
                         expanded
@@ -1161,7 +1678,6 @@ class MainActivity : AppCompatActivity() {
 
         showDaySwitch =
             SwitchCompat(this).apply {
-
                 text =
                     getString(
                         R.string.show_day
@@ -1189,7 +1705,6 @@ class MainActivity : AppCompatActivity() {
 
         val daySpacingLabel =
             TextView(this).apply {
-
                 text =
                     getString(
                         R.string.day_letter_spacing
@@ -1217,13 +1732,8 @@ class MainActivity : AppCompatActivity() {
 
         dayLetterSpacingInput =
             EditText(this).apply {
-
-                setSingleLine(
-                    true
-                )
-
-                textSize =
-                    16f
+                setSingleLine(true)
+                textSize = 16f
 
                 inputType =
                     android.text.InputType.TYPE_CLASS_NUMBER or
@@ -1259,7 +1769,6 @@ class MainActivity : AppCompatActivity() {
 
         val daySpacingHelp =
             TextView(this).apply {
-
                 text =
                     getString(
                         R.string.day_letter_spacing_help
@@ -1279,6 +1788,7 @@ class MainActivity : AppCompatActivity() {
                     4
             }
         )
+
 
         dayFontSizeControl =
             createFontSizeControl(
@@ -1321,7 +1831,6 @@ class MainActivity : AppCompatActivity() {
                 swatch =
                     dayColorSwatch,
                 onClick = {
-
                     showColorPicker(
                         elementName =
                             getString(
@@ -1332,14 +1841,12 @@ class MainActivity : AppCompatActivity() {
                                 this
                             ),
                         saveColor = { color ->
-
                             saveGlobalDayColor(
                                 this,
                                 color
                             )
                         },
                         updateValue = { color ->
-
                             dayColorValue.text =
                                 color
 
@@ -1368,9 +1875,63 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
+
+        darkDayColorSwatch =
+            createColorSwatch(
+                getGlobalWidgetDarkDayColor(this)
+            )
+
+        val darkDayColorRow =
+            createColorRow(
+                label =
+                    "DAY Colour",
+                color =
+                    getGlobalWidgetDarkDayColor(this),
+                swatch =
+                    darkDayColorSwatch,
+                onClick = {
+                    showColorPicker(
+                        elementName =
+                            "Dark DAY colour",
+                        currentColor =
+                            getGlobalWidgetDarkDayColor(this),
+                        saveColor = { color ->
+                            saveGlobalWidgetDarkDayColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+                            darkDayColorValue.text =
+                                color
+
+                            darkDayColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        darkDayColorValue =
+            darkDayColorRow.second
+
+        dayContent.addView(
+            darkDayColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
         dayShadowSwitch =
             SwitchCompat(this).apply {
-
                 text =
                     getString(
                         R.string.shadow
@@ -1412,7 +1973,6 @@ class MainActivity : AppCompatActivity() {
                 swatch =
                     dayShadowColorSwatch,
                 onClick = {
-
                     showColorPicker(
                         elementName =
                             getString(
@@ -1423,14 +1983,12 @@ class MainActivity : AppCompatActivity() {
                                 this
                             ),
                         saveColor = { color ->
-
                             saveGlobalDayShadowColor(
                                 this,
                                 color
                             )
                         },
                         updateValue = { color ->
-
                             dayShadowColorValue.text =
                                 color
 
@@ -1459,11 +2017,60 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        /*
-         * =====================================================
-         * DATE
-         * =====================================================
-         */
+
+        darkDayShadowColorSwatch =
+            createColorSwatch(
+                getGlobalWidgetDarkDayShadowColor(this)
+            )
+
+        val darkDayShadowColorRow =
+            createColorRow(
+                label =
+                    "DAY Shadow Colour",
+                color =
+                    getGlobalWidgetDarkDayShadowColor(this),
+                swatch =
+                    darkDayShadowColorSwatch,
+                onClick = {
+                    showColorPicker(
+                        elementName =
+                            "Dark DAY shadow",
+                        currentColor =
+                            getGlobalWidgetDarkDayShadowColor(this),
+                        saveColor = { color ->
+                            saveGlobalWidgetDarkDayShadowColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+                            darkDayShadowColorValue.text =
+                                color
+
+                            darkDayShadowColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        darkDayShadowColorValue =
+            darkDayShadowColorRow.second
+
+        dayContent.addView(
+            darkDayShadowColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
 
         val dateSection =
             createExpandableSection(
@@ -1476,7 +2083,6 @@ class MainActivity : AppCompatActivity() {
                         this
                     ),
                 onExpandedChanged = { expanded ->
-
                     saveGlobalDateSectionExpanded(
                         this,
                         expanded
@@ -1500,19 +2106,10 @@ class MainActivity : AppCompatActivity() {
 
         dateFormatInput =
             EditText(this).apply {
-
-                setSingleLine(
-                    true
-                )
-
-                textSize =
-                    16f
-
-                hint =
-                    DEFAULT_DATE_FORMAT
-
-                imeOptions =
-                    EditorInfo.IME_ACTION_DONE
+                setSingleLine(true)
+                textSize = 16f
+                hint = DEFAULT_DATE_FORMAT
+                imeOptions = EditorInfo.IME_ACTION_DONE
 
                 setText(
                     getGlobalDateFormat(
@@ -1538,7 +2135,6 @@ class MainActivity : AppCompatActivity() {
 
         val dateFormatHelp =
             TextView(this).apply {
-
                 text =
                     getString(
                         R.string.date_format_help
@@ -1600,7 +2196,6 @@ class MainActivity : AppCompatActivity() {
                 swatch =
                     dateColorSwatch,
                 onClick = {
-
                     showColorPicker(
                         elementName =
                             getString(
@@ -1611,14 +2206,12 @@ class MainActivity : AppCompatActivity() {
                                 this
                             ),
                         saveColor = { color ->
-
                             saveGlobalDateColor(
                                 this,
                                 color
                             )
                         },
                         updateValue = { color ->
-
                             dateColorValue.text =
                                 color
 
@@ -1647,9 +2240,63 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
+
+        darkDateColorSwatch =
+            createColorSwatch(
+                getGlobalWidgetDarkDateColor(this)
+            )
+
+        val darkDateColorRow =
+            createColorRow(
+                label =
+                    "DATE Colour",
+                color =
+                    getGlobalWidgetDarkDateColor(this),
+                swatch =
+                    darkDateColorSwatch,
+                onClick = {
+                    showColorPicker(
+                        elementName =
+                            "Dark DATE colour",
+                        currentColor =
+                            getGlobalWidgetDarkDateColor(this),
+                        saveColor = { color ->
+                            saveGlobalWidgetDarkDateColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+                            darkDateColorValue.text =
+                                color
+
+                            darkDateColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        darkDateColorValue =
+            darkDateColorRow.second
+
+        dateContent.addView(
+            darkDateColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
         dateShadowSwitch =
             SwitchCompat(this).apply {
-
                 text =
                     getString(
                         R.string.shadow
@@ -1691,7 +2338,6 @@ class MainActivity : AppCompatActivity() {
                 swatch =
                     dateShadowColorSwatch,
                 onClick = {
-
                     showColorPicker(
                         elementName =
                             getString(
@@ -1702,14 +2348,12 @@ class MainActivity : AppCompatActivity() {
                                 this
                             ),
                         saveColor = { color ->
-
                             saveGlobalDateShadowColor(
                                 this,
                                 color
                             )
                         },
                         updateValue = { color ->
-
                             dateShadowColorValue.text =
                                 color
 
@@ -1738,11 +2382,60 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        /*
-         * =====================================================
-         * TIME
-         * =====================================================
-         */
+
+        darkDateShadowColorSwatch =
+            createColorSwatch(
+                getGlobalWidgetDarkDateShadowColor(this)
+            )
+
+        val darkDateShadowColorRow =
+            createColorRow(
+                label =
+                    "DATE Shadow Colour",
+                color =
+                    getGlobalWidgetDarkDateShadowColor(this),
+                swatch =
+                    darkDateShadowColorSwatch,
+                onClick = {
+                    showColorPicker(
+                        elementName =
+                            "Dark DATE shadow",
+                        currentColor =
+                            getGlobalWidgetDarkDateShadowColor(this),
+                        saveColor = { color ->
+                            saveGlobalWidgetDarkDateShadowColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+                            darkDateShadowColorValue.text =
+                                color
+
+                            darkDateShadowColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        darkDateShadowColorValue =
+            darkDateShadowColorRow.second
+
+        dateContent.addView(
+            darkDateShadowColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
 
         val timeSection =
             createExpandableSection(
@@ -1755,7 +2448,6 @@ class MainActivity : AppCompatActivity() {
                         this
                     ),
                 onExpandedChanged = { expanded ->
-
                     saveGlobalTimeSectionExpanded(
                         this,
                         expanded
@@ -1779,19 +2471,10 @@ class MainActivity : AppCompatActivity() {
 
         timeFormatInput =
             EditText(this).apply {
-
-                setSingleLine(
-                    true
-                )
-
-                textSize =
-                    16f
-
-                hint =
-                    DEFAULT_TIME_FORMAT
-
-                imeOptions =
-                    EditorInfo.IME_ACTION_DONE
+                setSingleLine(true)
+                textSize = 16f
+                hint = DEFAULT_TIME_FORMAT
+                imeOptions = EditorInfo.IME_ACTION_DONE
 
                 setText(
                     getGlobalTimeFormat(
@@ -1817,7 +2500,6 @@ class MainActivity : AppCompatActivity() {
 
         val timeFormatHelp =
             TextView(this).apply {
-
                 text =
                     getString(
                         R.string.time_format_help
@@ -1879,7 +2561,6 @@ class MainActivity : AppCompatActivity() {
                 swatch =
                     timeColorSwatch,
                 onClick = {
-
                     showColorPicker(
                         elementName =
                             getString(
@@ -1890,14 +2571,12 @@ class MainActivity : AppCompatActivity() {
                                 this
                             ),
                         saveColor = { color ->
-
                             saveGlobalTimeColor(
                                 this,
                                 color
                             )
                         },
                         updateValue = { color ->
-
                             timeColorValue.text =
                                 color
 
@@ -1926,9 +2605,63 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
+
+        darkTimeColorSwatch =
+            createColorSwatch(
+                getGlobalWidgetDarkTimeColor(this)
+            )
+
+        val darkTimeColorRow =
+            createColorRow(
+                label =
+                    "TIME Colour",
+                color =
+                    getGlobalWidgetDarkTimeColor(this),
+                swatch =
+                    darkTimeColorSwatch,
+                onClick = {
+                    showColorPicker(
+                        elementName =
+                            "Dark TIME colour",
+                        currentColor =
+                            getGlobalWidgetDarkTimeColor(this),
+                        saveColor = { color ->
+                            saveGlobalWidgetDarkTimeColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+                            darkTimeColorValue.text =
+                                color
+
+                            darkTimeColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        darkTimeColorValue =
+            darkTimeColorRow.second
+
+        timeContent.addView(
+            darkTimeColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
         timeShadowSwitch =
             SwitchCompat(this).apply {
-
                 text =
                     getString(
                         R.string.shadow
@@ -1970,7 +2703,6 @@ class MainActivity : AppCompatActivity() {
                 swatch =
                     timeShadowColorSwatch,
                 onClick = {
-
                     showColorPicker(
                         elementName =
                             getString(
@@ -1981,14 +2713,12 @@ class MainActivity : AppCompatActivity() {
                                 this
                             ),
                         saveColor = { color ->
-
                             saveGlobalTimeShadowColor(
                                 this,
                                 color
                             )
                         },
                         updateValue = { color ->
-
                             timeShadowColorValue.text =
                                 color
 
@@ -2017,11 +2747,177 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        /*
-         * =====================================================
-         * LISTENERS
-         * =====================================================
-         */
+        darkTimeShadowColorSwatch =
+            createColorSwatch(
+                getGlobalWidgetDarkTimeShadowColor(this)
+            )
+
+        val darkTimeShadowColorRow =
+            createColorRow(
+                label =
+                    "TIME Shadow Colour",
+                color =
+                    getGlobalWidgetDarkTimeShadowColor(this),
+                swatch =
+                    darkTimeShadowColorSwatch,
+                onClick = {
+                    showColorPicker(
+                        elementName =
+                            "Dark TIME shadow",
+                        currentColor =
+                            getGlobalWidgetDarkTimeShadowColor(this),
+                        saveColor = { color ->
+                            saveGlobalWidgetDarkTimeShadowColor(
+                                this,
+                                color
+                            )
+                        },
+                        updateValue = { color ->
+                            darkTimeShadowColorValue.text =
+                                color
+
+                            darkTimeShadowColorSwatch.background =
+                                createColorDrawable(
+                                    color
+                                )
+
+                            updatePreview()
+                        }
+                    )
+                }
+            )
+
+        darkTimeShadowColorValue =
+            darkTimeShadowColorRow.second
+
+        timeContent.addView(
+            darkTimeShadowColorRow.first,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin =
+                    4
+            }
+        )
+
+        fun applyWidgetColourTab(
+            dark: Boolean
+        ) {
+            dayColorValue.parent.let {
+                (it as View).isVisible = !dark
+            }
+            darkDayColorValue.parent.let {
+                (it as View).isVisible = dark
+            }
+            dayShadowColorValue.parent.let {
+                (it as View).isVisible = !dark
+            }
+            darkDayShadowColorValue.parent.let {
+                (it as View).isVisible = dark
+            }
+
+            dateColorValue.parent.let {
+                (it as View).isVisible = !dark
+            }
+            darkDateColorValue.parent.let {
+                (it as View).isVisible = dark
+            }
+            dateShadowColorValue.parent.let {
+                (it as View).isVisible = !dark
+            }
+            darkDateShadowColorValue.parent.let {
+                (it as View).isVisible = dark
+            }
+
+            timeColorValue.parent.let {
+                (it as View).isVisible = !dark
+            }
+            darkTimeColorValue.parent.let {
+                (it as View).isVisible = dark
+            }
+            timeShadowColorValue.parent.let {
+                (it as View).isVisible = !dark
+            }
+            darkTimeShadowColorValue.parent.let {
+                (it as View).isVisible = dark
+            }
+
+            val selectedBackground =
+                GradientDrawable().apply {
+                    shape =
+                        GradientDrawable.RECTANGLE
+
+                    cornerRadius =
+                        12f
+
+                    setColor(
+                        if (dark) {
+                            Color.DKGRAY
+                        } else {
+                            Color.LTGRAY
+                        }
+                    )
+                }
+
+            val unselectedBackground =
+                GradientDrawable().apply {
+                    shape =
+                        GradientDrawable.RECTANGLE
+
+                    cornerRadius =
+                        12f
+
+                    setColor(
+                        Color.TRANSPARENT
+                    )
+                }
+
+            lightColourTabButton.background =
+                if (dark) {
+                    unselectedBackground
+                } else {
+                    selectedBackground
+                }
+
+            darkColourTabButton.background =
+                if (dark) {
+                    selectedBackground
+                } else {
+                    unselectedBackground
+                }
+
+            lightColourTabButton.setTextColor(
+                if (dark) {
+                    Color.GRAY
+                } else {
+                    Color.BLACK
+                }
+            )
+
+            darkColourTabButton.setTextColor(
+                if (dark) {
+                    Color.WHITE
+                } else {
+                    Color.GRAY
+                }
+            )
+
+            lightColourTabButton.isEnabled =
+                dark
+            darkColourTabButton.isEnabled =
+                !dark
+        }
+
+        lightColourTabButton.setOnClickListener {
+            applyWidgetColourTab(false)
+        }
+
+        darkColourTabButton.setOnClickListener {
+            applyWidgetColourTab(true)
+        }
+
+        applyWidgetColourTab(false)
 
         showDaySwitch.setOnCheckedChangeListener {
                 _,
@@ -2350,6 +3246,116 @@ class MainActivity : AppCompatActivity() {
         applyTrueBlackBackground()
     }
 
+    private fun updateBatteryUsageButton() {
+
+        if (
+            !::batteryUsageButton.isInitialized
+        ) {
+            return
+        }
+
+        val powerManager =
+            getSystemService(
+                PowerManager::class.java
+            )
+
+        val unrestricted =
+            powerManager.isIgnoringBatteryOptimizations(
+                packageName
+            )
+
+        batteryUsageButton.text =
+            if (unrestricted) {
+                "Battery: Unrestricted"
+            } else {
+                "Set battery to unrestricted"
+            }
+    }
+
+    private fun requestBatteryUnrestricted() {
+
+        startActivity(
+            Intent(
+                Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+            )
+        )
+    }
+
+    private fun updateWidgetAppearanceButtonText(
+        button: Button
+    ) {
+
+        button.text =
+            when (
+                getGlobalWidgetAppearance(this)
+            ) {
+                "light" ->
+                    "Widget appearance: Light"
+
+                "dark" ->
+                    "Widget appearance: Dark"
+
+                else ->
+                    "Widget appearance: Follow system"
+            }
+    }
+
+    private fun showWidgetAppearanceMenu(
+        anchor: View
+    ) {
+
+        val popupMenu =
+            PopupMenu(
+                this,
+                anchor
+            )
+
+        popupMenu.menu.add(
+            "Follow system"
+        )
+
+        popupMenu.menu.add(
+            "Light"
+        )
+
+        popupMenu.menu.add(
+            "Dark"
+        )
+
+        popupMenu.setOnMenuItemClickListener { item ->
+
+            val appearance =
+                when (
+                    item.title.toString()
+                ) {
+                    "Light" ->
+                        "light"
+
+                    "Dark" ->
+                        "dark"
+
+                    else ->
+                        "follow_system"
+                }
+
+            saveGlobalWidgetAppearance(
+                this,
+                appearance
+            )
+
+            updateWidgetAppearanceButtonText(
+                widgetAppearanceButton
+            )
+
+            updateAllWidgets()
+            updatePreview()
+
+            true
+        }
+
+        popupMenu.show()
+    }
+
     private fun createExpandableSection(
         title: String,
         initiallyExpanded: Boolean,
@@ -2502,7 +3508,6 @@ class MainActivity : AppCompatActivity() {
 
         val labelView =
             TextView(this).apply {
-
                 text =
                     label
 
@@ -2663,7 +3668,6 @@ class MainActivity : AppCompatActivity() {
                     false
 
                 setOnClickListener {
-
                     handleFontSizeChange(
                         element,
                         DEFAULT_FONT_SIZE_PERCENT
@@ -2706,44 +3710,27 @@ class MainActivity : AppCompatActivity() {
     ) {
 
         var requestedDay =
-            getGlobalDayFontSize(
-                this
-            )
+            getGlobalDayFontSize(this)
 
         var requestedDate =
-            getGlobalDateFontSize(
-                this
-            )
+            getGlobalDateFontSize(this)
 
         var requestedTime =
-            getGlobalTimeFontSize(
-                this
-            )
+            getGlobalTimeFontSize(this)
 
-        when (
-            changedElement
-        ) {
+        when (changedElement) {
+            ModernClockWidget.FontSizeElement.DAY ->
+                requestedDay = requestedValue
 
-            ModernClockWidget.FontSizeElement.DAY -> {
-                requestedDay =
-                    requestedValue
-            }
+            ModernClockWidget.FontSizeElement.DATE ->
+                requestedDate = requestedValue
 
-            ModernClockWidget.FontSizeElement.DATE -> {
-                requestedDate =
-                    requestedValue
-            }
-
-            ModernClockWidget.FontSizeElement.TIME -> {
-                requestedTime =
-                    requestedValue
-            }
+            ModernClockWidget.FontSizeElement.TIME ->
+                requestedTime = requestedValue
         }
 
         val appWidgetManager =
-            AppWidgetManager.getInstance(
-                this
-            )
+            AppWidgetManager.getInstance(this)
 
         val componentName =
             ComponentName(
@@ -2763,13 +3750,9 @@ class MainActivity : AppCompatActivity() {
                 time = requestedTime
             )
 
-        if (
-            widgetIds.isNotEmpty()
-        ) {
+        if (widgetIds.isNotEmpty()) {
 
-            for (
-            widgetId in widgetIds
-            ) {
+            for (widgetId in widgetIds) {
 
                 val options =
                     appWidgetManager.getAppWidgetOptions(
@@ -2778,15 +3761,13 @@ class MainActivity : AppCompatActivity() {
 
                 val widthDp =
                     options.getInt(
-                        AppWidgetManager
-                            .OPTION_APPWIDGET_MIN_WIDTH,
+                        AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
                         180
                     )
 
                 val heightDp =
                     options.getInt(
-                        AppWidgetManager
-                            .OPTION_APPWIDGET_MIN_HEIGHT,
+                        AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
                         40
                     )
 
@@ -2796,21 +3777,13 @@ class MainActivity : AppCompatActivity() {
                         widthDp = widthDp,
                         heightDp = heightDp,
                         timeFormat =
-                            getGlobalTimeFormat(
-                                this
-                            ),
+                            getGlobalTimeFormat(this),
                         dateFormat =
-                            getGlobalDateFormat(
-                                this
-                            ),
+                            getGlobalDateFormat(this),
                         showDay =
-                            getGlobalShowDay(
-                                this
-                            ),
+                            getGlobalShowDay(this),
                         dayLetterSpacing =
-                            getGlobalDayLetterSpacing(
-                                this
-                            ),
+                            getGlobalDayLetterSpacing(this),
                         requestedDaySizePercent =
                             requestedDay,
                         requestedDateSizePercent =
@@ -2864,21 +3837,13 @@ class MainActivity : AppCompatActivity() {
                     widthDp = previewWidthDp,
                     heightDp = previewHeightDp,
                     timeFormat =
-                        getGlobalTimeFormat(
-                            this
-                        ),
+                        getGlobalTimeFormat(this),
                     dateFormat =
-                        getGlobalDateFormat(
-                            this
-                        ),
+                        getGlobalDateFormat(this),
                     showDay =
-                        getGlobalShowDay(
-                            this
-                        ),
+                        getGlobalShowDay(this),
                     dayLetterSpacing =
-                        getGlobalDayLetterSpacing(
-                            this
-                        ),
+                        getGlobalDayLetterSpacing(this),
                     requestedDaySizePercent =
                         requestedDay,
                     requestedDateSizePercent =
@@ -2926,26 +3891,17 @@ class MainActivity : AppCompatActivity() {
         values: ModernClockWidget.FontSizeValues
     ) {
 
-        if (
-            updatingFontSizeControls
-        ) {
+        if (updatingFontSizeControls) {
             return
         }
 
-        dayFontSizeControl.setValue(
-            values.day
-        )
-
-        dateFontSizeControl.setValue(
-            values.date
-        )
-
-        timeFontSizeControl.setValue(
-            values.time
-        )
+        dayFontSizeControl.setValue(values.day)
+        dateFontSizeControl.setValue(values.date)
+        timeFontSizeControl.setValue(values.time)
     }
 
-    private fun getFittedPreviewFontSizes(): ModernClockWidget.FontSizeValues {
+    private fun getFittedPreviewFontSizes():
+            ModernClockWidget.FontSizeValues {
 
         val density =
             resources.displayMetrics.density
@@ -2967,16 +3923,14 @@ class MainActivity : AppCompatActivity() {
             widthDp = previewWidthDp,
             heightDp = previewHeightDp,
             timeFormat =
-                timeFormatInput
-                    .text
+                timeFormatInput.text
                     .toString()
                     .trim()
                     .ifBlank {
                         DEFAULT_TIME_FORMAT
                     },
             dateFormat =
-                dateFormatInput
-                    .text
+                dateFormatInput.text
                     .toString()
                     .trim()
                     .ifBlank {
@@ -2985,21 +3939,13 @@ class MainActivity : AppCompatActivity() {
             showDay =
                 showDaySwitch.isChecked,
             dayLetterSpacing =
-                getGlobalDayLetterSpacing(
-                    this
-                ),
+                getGlobalDayLetterSpacing(this),
             requestedDaySizePercent =
-                getGlobalDayFontSize(
-                    this
-                ),
+                getGlobalDayFontSize(this),
             requestedDateSizePercent =
-                getGlobalDateFontSize(
-                    this
-                ),
+                getGlobalDateFontSize(this),
             requestedTimeSizePercent =
-                getGlobalTimeFontSize(
-                    this
-                ),
+                getGlobalTimeFontSize(this),
             changedElement =
                 null
         )
@@ -3046,9 +3992,7 @@ class MainActivity : AppCompatActivity() {
             currentFocus as? EditText
                 ?: return
 
-        if (
-            field.parent == null
-        ) {
+        if (field.parent == null) {
             return
         }
 
@@ -3070,12 +4014,10 @@ class MainActivity : AppCompatActivity() {
             fieldLocation[1]
 
         val fieldBottom =
-            fieldLocation[1] +
-                    field.height
+            fieldLocation[1] + field.height
 
         val scrollTop =
-            scrollLocation[1] +
-                    16
+            scrollLocation[1] + 16
 
         val visibleBottom =
             window.decorView.height -
@@ -3087,20 +4029,16 @@ class MainActivity : AppCompatActivity() {
         when {
 
             fieldBottom > visibleBottom -> {
-
                 scrollView.scrollBy(
                     0,
-                    fieldBottom -
-                            visibleBottom
+                    fieldBottom - visibleBottom
                 )
             }
 
             fieldTop < scrollTop -> {
-
                 scrollView.scrollBy(
                     0,
-                    fieldTop -
-                            scrollTop
+                    fieldTop - scrollTop
                 )
             }
         }
@@ -3147,8 +4085,7 @@ class MainActivity : AppCompatActivity() {
     private fun saveDayLetterSpacing() {
 
         val value =
-            dayLetterSpacingInput
-                .text
+            dayLetterSpacingInput.text
                 .toString()
                 .trim()
                 .toFloatOrNull()
@@ -3177,11 +4114,8 @@ class MainActivity : AppCompatActivity() {
     ): View {
 
         return View(this).apply {
-
             background =
-                createColorDrawable(
-                    color
-                )
+                createColorDrawable(color)
         }
     }
 
@@ -3247,9 +4181,7 @@ class MainActivity : AppCompatActivity() {
                     )
             }
 
-        row.addView(
-            labelView
-        )
+        row.addView(labelView)
 
         val valueView =
             TextView(this).apply {
@@ -3264,9 +4196,7 @@ class MainActivity : AppCompatActivity() {
                     Gravity.CENTER_VERTICAL
             }
 
-        row.addView(
-            valueView
-        )
+        row.addView(valueView)
 
         return Pair(
             row,
@@ -3288,9 +4218,7 @@ class MainActivity : AppCompatActivity() {
             8f
 
         drawable.setColor(
-            parseColor(
-                color
-            )
+            parseColor(color)
         )
 
         drawable.setStroke(
@@ -3322,9 +4250,7 @@ class MainActivity : AppCompatActivity() {
     ) {
 
         val initialColor =
-            parseColor(
-                currentColor
-            )
+            parseColor(currentColor)
 
         val picker =
             ColorPickerView(
@@ -3356,11 +4282,8 @@ class MainActivity : AppCompatActivity() {
 
         val selectedColor =
             View(this).apply {
-
                 background =
-                    createColorDrawable(
-                        currentColor
-                    )
+                    createColorDrawable(currentColor)
             }
 
         container.addView(
@@ -3396,25 +4319,15 @@ class MainActivity : AppCompatActivity() {
         val hexInput =
             EditText(this).apply {
 
-                setSingleLine(
-                    true
-                )
-
-                textSize =
-                    16f
-
-                hint =
-                    "#FFFFFF"
+                setSingleLine(true)
+                textSize = 16f
+                hint = "#FFFFFF"
 
                 setText(
-                    colorToHex(
-                        initialColor
-                    )
+                    colorToHex(initialColor)
                 )
 
-                setSelection(
-                    text.length
-                )
+                setSelection(text.length)
 
                 imeOptions =
                     EditorInfo.IME_ACTION_DONE
@@ -3427,9 +4340,7 @@ class MainActivity : AppCompatActivity() {
                     )
             }
 
-        hexRow.addView(
-            hexInput
-        )
+        hexRow.addView(hexInput)
 
         val copyButton =
             TextView(this).apply {
@@ -3470,20 +4381,16 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        container.addView(
-            hexRow
-        )
+        container.addView(hexRow)
 
         val rgbValue =
             TextView(this).apply {
-                textSize =
-                    13f
+                textSize = 13f
             }
 
         val hslValue =
             TextView(this).apply {
-                textSize =
-                    13f
+                textSize = 13f
             }
 
         container.addView(
@@ -3560,9 +4467,7 @@ class MainActivity : AppCompatActivity() {
                 "#FF00FF"
             )
 
-        for (
-        quickColor in quickColors
-        ) {
+        for (quickColor in quickColors) {
 
             val swatch =
                 View(this).apply {
@@ -3579,7 +4484,6 @@ class MainActivity : AppCompatActivity() {
                         true
 
                     setOnClickListener {
-
                         picker.setColor(
                             parseColor(
                                 quickColor
@@ -3616,24 +4520,16 @@ class MainActivity : AppCompatActivity() {
         ) {
 
             val hex =
-                colorToHex(
-                    color
-                )
+                colorToHex(color)
 
             val red =
-                Color.red(
-                    color
-                )
+                Color.red(color)
 
             val green =
-                Color.green(
-                    color
-                )
+                Color.green(color)
 
             val blue =
-                Color.blue(
-                    color
-                )
+                Color.blue(color)
 
             val hsl =
                 rgbToHsl(
@@ -3643,9 +4539,7 @@ class MainActivity : AppCompatActivity() {
                 )
 
             selectedColor.background =
-                createColorDrawable(
-                    hex
-                )
+                createColorDrawable(hex)
 
             rgbValue.text =
                 getString(
@@ -3671,30 +4565,22 @@ class MainActivity : AppCompatActivity() {
             { color ->
 
                 val hex =
-                    colorToHex(
-                        color
-                    )
+                    colorToHex(color)
 
                 if (!updatingHex) {
 
-                    updatingHex =
-                        true
+                    updatingHex = true
 
-                    hexInput.setText(
-                        hex
-                    )
+                    hexInput.setText(hex)
 
                     hexInput.setSelection(
                         hexInput.text.length
                     )
 
-                    updatingHex =
-                        false
+                    updatingHex = false
                 }
 
-                refreshInformation(
-                    color
-                )
+                refreshInformation(color)
             }
 
         hexInput.addTextChangedListener(
@@ -3724,17 +4610,13 @@ class MainActivity : AppCompatActivity() {
                             s?.toString()
                         ) ?: return
 
-                    updatingHex =
-                        true
+                    updatingHex = true
 
                     picker.setColor(
-                        parseColor(
-                            normalized
-                        )
+                        parseColor(normalized)
                     )
 
-                    updatingHex =
-                        false
+                    updatingHex = false
                 }
 
                 override fun afterTextChanged(
@@ -3774,9 +4656,7 @@ class MainActivity : AppCompatActivity() {
                         elementName
                     )
                 )
-                .setView(
-                    container
-                )
+                .setView(container)
                 .setNegativeButton(
                     R.string.cancel,
                     null
@@ -3814,13 +4694,8 @@ class MainActivity : AppCompatActivity() {
                         return@setOnClickListener
                     }
 
-                    saveColor(
-                        color
-                    )
-
-                    updateValue(
-                        color
-                    )
+                    saveColor(color)
+                    updateValue(color)
 
                     updateAllWidgets()
 
@@ -3830,12 +4705,6 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
 
-        /*
-         * When Dark Mode and True Black/OLED mode are both enabled,
-         * use a true #000000 background for the color picker dialog.
-         *
-         * Otherwise, the dialog keeps its existing themed background.
-         */
         if (
             isTrueBlackEnabled(this) &&
             (
@@ -3856,15 +4725,9 @@ class MainActivity : AppCompatActivity() {
         return String.format(
             Locale.US,
             "#%02X%02X%02X",
-            Color.red(
-                color
-            ),
-            Color.green(
-                color
-            ),
-            Color.blue(
-                color
-            )
+            Color.red(color),
+            Color.green(color),
+            Color.blue(color)
         )
     }
 
@@ -3875,9 +4738,7 @@ class MainActivity : AppCompatActivity() {
         var value =
             input
                 ?.trim()
-                ?.uppercase(
-                    Locale.US
-                )
+                ?.uppercase(Locale.US)
                 ?: return null
 
         if (value.isEmpty()) {
@@ -3885,16 +4746,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (!value.startsWith("#")) {
-            value =
-                "#$value"
+            value = "#$value"
         }
 
         if (
             !Regex(
                 "^#[0-9A-F]{6}$"
-            ).matches(
-                value
-            )
+            ).matches(value)
         ) {
             return null
         }
@@ -3908,39 +4766,26 @@ class MainActivity : AppCompatActivity() {
         blue: Int
     ): FloatArray {
 
-        val r =
-            red / 255f
-
-        val g =
-            green / 255f
-
-        val b =
-            blue / 255f
+        val r = red / 255f
+        val g = green / 255f
+        val b = blue / 255f
 
         val maxValue =
             max(
                 r,
-                max(
-                    g,
-                    b
-                )
+                max(g, b)
             )
 
         val minValue =
             minOf(
                 r,
-                minOf(
-                    g,
-                    b
-                )
+                minOf(g, b)
             )
 
         val delta =
-            maxValue -
-                    minValue
+            maxValue - minValue
 
-        var hue =
-            0f
+        var hue = 0f
 
         val lightness =
             (
@@ -3948,12 +4793,9 @@ class MainActivity : AppCompatActivity() {
                             minValue
                     ) / 2f
 
-        var saturation =
-            0f
+        var saturation = 0f
 
-        if (
-            delta != 0f
-        ) {
+        if (delta != 0f) {
 
             saturation =
                 delta /
@@ -4002,11 +4844,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-            if (
-                hue < 0f
-            ) {
-                hue +=
-                    360f
+            if (hue < 0f) {
+                hue += 360f
             }
         }
 
@@ -4023,9 +4862,7 @@ class MainActivity : AppCompatActivity() {
             "#D0D0D0".toColorInt()
         )
 
-        if (
-            !Environment.isExternalStorageManager()
-        ) {
+        if (!Environment.isExternalStorageManager()) {
             return
         }
 
@@ -4045,9 +4882,7 @@ class MainActivity : AppCompatActivity() {
                 null
             }
 
-        if (
-            wallpaperFile == null
-        ) {
+        if (wallpaperFile == null) {
             return
         }
 
@@ -4058,11 +4893,10 @@ class MainActivity : AppCompatActivity() {
                     file.fileDescriptor
                 )
 
-            if (
-                bitmap != null
-            ) {
+            if (bitmap != null) {
 
-                preview.background = bitmap.toDrawable(resources)
+                preview.background =
+                    bitmap.toDrawable(resources)
             }
         }
     }
@@ -4070,9 +4904,7 @@ class MainActivity : AppCompatActivity() {
     private fun applyTrueBlackBackground() {
 
         val trueBlack =
-            isTrueBlackEnabled(
-                this
-            )
+            isTrueBlackEnabled(this)
 
         val isDarkMode =
             (
@@ -4160,9 +4992,7 @@ class MainActivity : AppCompatActivity() {
                     }
             }
 
-        container.addView(
-            createdByLabel
-        )
+        container.addView(createdByLabel)
 
         val creatorLink =
             TextView(this).apply {
@@ -4253,9 +5083,7 @@ class MainActivity : AppCompatActivity() {
                 attributionText
             )
 
-        if (
-            attributionStart >= 0
-        ) {
+        if (attributionStart >= 0) {
 
             attributionSpannable.setSpan(
                 object :
@@ -4295,9 +5123,7 @@ class MainActivity : AppCompatActivity() {
         attribution.text =
             attributionSpannable
 
-        container.addView(
-            attribution
-        )
+        container.addView(attribution)
 
         val dialog =
             AlertDialog.Builder(this)
@@ -4309,9 +5135,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     )
                 )
-                .setView(
-                    container
-                )
+                .setView(container)
                 .setNeutralButton(
                     R.string.github,
                     null
@@ -4342,12 +5166,6 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
 
-        /*
-         * When Dark Mode and True Black/OLED mode are both enabled,
-         * use a true #000000 background for the About dialog.
-         *
-         * Otherwise, the dialog keeps its existing themed background.
-         */
         if (
             isTrueBlackEnabled(this) &&
             (
@@ -4394,11 +5212,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if (
-            !isValidDateFormat(
-                format
-            )
-        ) {
+        if (!isValidDateFormat(format)) {
             return
         }
 
@@ -4420,11 +5234,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if (
-            !isValidDateFormat(
-                format
-            )
-        ) {
+        if (!isValidDateFormat(format)) {
             return
         }
 
@@ -4437,9 +5247,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateAllWidgets() {
 
         val appWidgetManager =
-            AppWidgetManager.getInstance(
-                this
-            )
+            AppWidgetManager.getInstance(this)
 
         val componentName =
             ComponentName(
@@ -4452,9 +5260,7 @@ class MainActivity : AppCompatActivity() {
                 componentName
             )
 
-        if (
-            widgetIds.isEmpty()
-        ) {
+        if (widgetIds.isEmpty()) {
             return
         }
 
@@ -4473,9 +5279,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-        sendBroadcast(
-            updateIntent
-        )
+        sendBroadcast(updateIntent)
     }
 
     private fun updatePreview() {
@@ -4499,8 +5303,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val timeFormat =
-            timeFormatInput
-                .text
+            timeFormatInput.text
                 .toString()
                 .trim()
                 .ifBlank {
@@ -4508,8 +5311,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
         val dateFormat =
-            dateFormatInput
-                .text
+            dateFormatInput.text
                 .toString()
                 .trim()
                 .ifBlank {
@@ -4519,19 +5321,11 @@ class MainActivity : AppCompatActivity() {
         val showDay =
             showDaySwitch.isChecked
 
-        if (
-            !isValidDateFormat(
-                timeFormat
-            )
-        ) {
+        if (!isValidDateFormat(timeFormat)) {
             return
         }
 
-        if (
-            !isValidDateFormat(
-                dateFormat
-            )
-        ) {
+        if (!isValidDateFormat(dateFormat)) {
             return
         }
 
@@ -4539,19 +5333,13 @@ class MainActivity : AppCompatActivity() {
             getFittedPreviewFontSizes()
 
         val currentDay =
-            getGlobalDayFontSize(
-                this
-            )
+            getGlobalDayFontSize(this)
 
         val currentDate =
-            getGlobalDateFontSize(
-                this
-            )
+            getGlobalDateFontSize(this)
 
         val currentTime =
-            getGlobalTimeFontSize(
-                this
-            )
+            getGlobalTimeFontSize(this)
 
         if (
             fittedSizes.day != currentDay ||
@@ -4559,13 +5347,8 @@ class MainActivity : AppCompatActivity() {
             fittedSizes.time != currentTime
         ) {
 
-            saveFittedFontSizes(
-                fittedSizes
-            )
-
-            updateFontSizeControls(
-                fittedSizes
-            )
+            saveFittedFontSizes(fittedSizes)
+            updateFontSizeControls(fittedSizes)
         }
 
         preview.setImageBitmap(
@@ -4586,15 +5369,10 @@ class MainActivity : AppCompatActivity() {
     ) : View(context) {
 
         private val paint =
-            Paint(
-                Paint.ANTI_ALIAS_FLAG
-            )
+            Paint(Paint.ANTI_ALIAS_FLAG)
 
         private val selectorPaint =
-            Paint(
-                Paint.ANTI_ALIAS_FLAG
-            ).apply {
-
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style =
                     Paint.Style.STROKE
 
@@ -4606,10 +5384,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         private val shadowPaint =
-            Paint(
-                Paint.ANTI_ALIAS_FLAG
-            ).apply {
-
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style =
                     Paint.Style.STROKE
 
@@ -4620,39 +5395,25 @@ class MainActivity : AppCompatActivity() {
                     Color.BLACK
             }
 
-        private var hue =
-            0f
+        private var hue = 0f
+        private var saturation = 0f
+        private var value = 1f
 
-        private var saturation =
-            0f
-
-        private var value =
-            1f
-
-        private var selectorX =
-            0f
-
-        private var selectorY =
-            0f
-
-        private var hueX =
-            0f
+        private var selectorX = 0f
+        private var selectorY = 0f
+        private var hueX = 0f
 
         private var hueGradient:
-                LinearGradient? =
-            null
+                LinearGradient? = null
 
         private var whiteGradient:
-                LinearGradient? =
-            null
+                LinearGradient? = null
 
         private var blackGradient:
-                LinearGradient? =
-            null
+                LinearGradient? = null
 
         var onColorChanged:
-                ((Int) -> Unit)? =
-            null
+                ((Int) -> Unit)? = null
 
         init {
 
@@ -4664,14 +5425,9 @@ class MainActivity : AppCompatActivity() {
                 hsv
             )
 
-            hue =
-                hsv[0]
-
-            saturation =
-                hsv[1]
-
-            value =
-                hsv[2]
+            hue = hsv[0]
+            saturation = hsv[1]
+            value = hsv[2]
 
             setLayerType(
                 LAYER_TYPE_SOFTWARE,
@@ -4702,17 +5458,11 @@ class MainActivity : AppCompatActivity() {
                 hsv
             )
 
-            hue =
-                hsv[0]
-
-            saturation =
-                hsv[1]
-
-            value =
-                hsv[2]
+            hue = hsv[0]
+            saturation = hsv[1]
+            value = hsv[2]
 
             updatePositions()
-
             invalidate()
 
             onColorChanged?.invoke(
@@ -4824,9 +5574,7 @@ class MainActivity : AppCompatActivity() {
             canvas: Canvas
         ) {
 
-            super.onDraw(
-                canvas
-            )
+            super.onDraw(canvas)
 
             val padding =
                 8f
@@ -4843,11 +5591,8 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
 
-            paint.shader =
-                null
-
-            paint.color =
-                hueColor
+            paint.shader = null
+            paint.color = hueColor
 
             canvas.drawRoundRect(
                 padding,
@@ -4859,8 +5604,7 @@ class MainActivity : AppCompatActivity() {
                 paint
             )
 
-            paint.shader =
-                whiteGradient
+            paint.shader = whiteGradient
 
             canvas.drawRoundRect(
                 padding,
@@ -4872,8 +5616,7 @@ class MainActivity : AppCompatActivity() {
                 paint
             )
 
-            paint.shader =
-                blackGradient
+            paint.shader = blackGradient
 
             canvas.drawRoundRect(
                 padding,
@@ -4885,8 +5628,7 @@ class MainActivity : AppCompatActivity() {
                 paint
             )
 
-            paint.shader =
-                null
+            paint.shader = null
 
             canvas.drawCircle(
                 selectorX,
@@ -4921,8 +5663,7 @@ class MainActivity : AppCompatActivity() {
                 paint
             )
 
-            paint.shader =
-                null
+            paint.shader = null
 
             val hueSelectorY =
                 (

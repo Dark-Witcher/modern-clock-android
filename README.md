@@ -34,7 +34,7 @@ It is deliberately simple: a stylized day, date, and time — with enough contro
 - 👁️ Option to show or hide the day
 - 🌑 Subtle text shadows for readability over wallpapers
 - 🖤 True-black OLED mode
-- 🌗 Light, dark, and system appearance settings
+- 🌗 Independent Light, Dark, and Follow system widget appearance
 - 📐 Resizable Android widget
 - ⚡ Automatic clock updates
 - 📱 No Google Play Services required
@@ -92,9 +92,9 @@ Android may ask you to allow installation from the source you used to download t
 Modern Clock has been tested on:
 
 - Samsung Galaxy S9+ — Android 14 / One UI 6
-- Samsung Galaxy S23 Ultra - Android 16 / One UI 8.5
+- Samsung Galaxy S23 Ultra — Android 16 / One UI 8.5
 - Huawei MatePad 11 — HarmonyOS 3
-- Google Pixel 10 Pro - Android 17
+- Google Pixel 10 Pro — Android 17
 
 ## ⚙️ Configuration
 
@@ -147,6 +147,14 @@ Each element can be configured independently using the built-in color picker.
 
 HEX values can be entered directly, with RGB and HSL representations available in the picker.
 
+Widget colors can be configured independently for **Light** and **Dark** appearance:
+
+- Light DAY, DATE, and TIME colors
+- Dark DAY, DATE, and TIME colors
+- Separate Light and Dark shadow colors
+
+Existing color settings are preserved when upgrading from earlier versions.
+
 ### Appearance and OLED mode
 
 The app supports:
@@ -155,6 +163,25 @@ The app supports:
 - Light
 - Dark
 - True-black background for OLED displays
+
+The widget has its own independent appearance setting:
+
+- **Follow system** — follows the device's Light/Dark mode
+- **Light** — always uses Light widget colors
+- **Dark** — always uses Dark widget colors
+
+### Widget Updates
+
+Version 1.2 improves widget update reliability across different Android devices and launchers.
+
+The widget now handles:
+
+- Application updates
+- Time changes
+- Date changes
+- Timezone changes
+- System Light/Dark mode changes when **Follow system** is selected
+- Widget refresh when opening the application
 
 ## 🛠️ Building from Source
 
@@ -195,17 +222,82 @@ A release build must be signed with your own keystore.
 
 ## 🚧 Current release
 
-**v1.1 — Stable**
+**v1.2 — Stable**
 
-Version 1.1 expands the original release with additional customization and typography controls while keeping the interface focused.
+Version 1.2 expands widget appearance and customization controls, improves responsive sizing and rendering, and significantly improves widget update reliability across different devices and launchers.
 
 See the [Releases](https://github.com/Dark-Witcher/modern-clock-android/releases) page for the latest build.
 
 ## 🗺️ Roadmap
 
-### v1.2
+### v1.2 — Completed
 
-Development is focused on further refining widget sizing, typography relationships, spacing, and rendering across different screen sizes and device configurations.
+Version 1.2 focused on widget appearance, responsive sizing, rendering reliability, and improved compatibility across different Android devices and launchers.
+
+#### Widget appearance
+
+- Added **Follow system**, **Light**, and **Dark** widget appearance modes.
+- Added independent Light and Dark colors for DAY, DATE, and TIME.
+- Added independent Light and Dark shadow colors.
+- Added Light/Dark color selection tabs.
+
+#### App appearance
+
+- Added **Same as device**, **Light**, **Dark**, and **True black** application appearance modes.
+
+#### Responsive sizing
+
+- Added independent size controls for DAY, DATE, and TIME.
+- Improved responsive fitting when text becomes too large for the available widget space.
+- Preserved the relationship between the sizes of the individual elements.
+
+#### Widget reliability
+
+- Improved widget updates after application updates.
+- Improved handling of time, date, and timezone changes.
+- Added detection of system Light/Dark changes for **Follow system** widgets.
+- Improved compatibility with different Android launchers and manufacturers.
+
+#### Battery usage
+
+- Added access to Android's unrestricted battery usage setting for Modern Clock.
+
+#### Known issue
+
+On some devices, the widget may not visually update immediately when the system switches between **Light** and **Dark** mode while **Follow system** is selected. Modern Clock detects the change and updates the widget, but some launchers may delay displaying the updated appearance for up to a minute.
+
+### v1.3 — Planned
+
+Version 1.3 will focus primarily on bug fixes, compatibility improvements, and additional widget interaction.
+
+#### Bug fixes
+
+- Continue investigating and fixing bugs discovered during v1.2 testing.
+- Address newly reported bugs where possible.
+- Continue improving widget update and rendering reliability.
+- Continue compatibility testing across different devices and launchers.
+
+#### Widget interaction
+
+- Add an option to choose **which application opens when the widget is clicked**.
+
+#### Additional improvements
+
+Additional small improvements and fixes will be considered during v1.3 development based on testing and user feedback.
+
+### v2.0 — Planned
+
+Version 2 is planned as the major long-term update to Modern Clock.
+
+The current direction for v2 includes a significant typography and rendering update, with planned work around:
+
+- Custom font support and the replacement of the current Anurati-based DAY rendering
+- Further typography and font-scaling improvements
+- More advanced customization of the individual widget elements
+- Continued rendering-quality and compatibility improvements
+- Additional customization while keeping the interface focused and simple
+
+The exact v2 feature set will be defined during the v1.x development cycle.
 
 The project intentionally keeps the interface focused rather than turning the widget into an overly complicated customization tool.
 
