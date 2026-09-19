@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
+import android.content.res.Configuration
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -12,9 +13,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.util.SizeF
 import android.widget.RemoteViews
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.createBitmap
@@ -28,19 +31,6 @@ import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 class ModernClockWidget : AppWidgetProvider() {
-
-    /*
-     * =========================================================
-     * FONT SIZE TYPES
-     * =========================================================
-     *
-     * These are nested directly inside ModernClockWidget rather
-     * than inside the companion object so they can be referenced
-     * cleanly from MainActivity as:
-     *
-     * ModernClockWidget.FontSizeValues
-     * ModernClockWidget.FontSizeElement
-     */
 
     data class FontSizeValues(
         val day: Int,
@@ -59,27 +49,9 @@ class ModernClockWidget : AppWidgetProvider() {
         const val ACTION_UPDATE =
             "com.example.modernclock.UPDATE"
 
-        /*
-         * =====================================================
-         * WIDGET LOCALE
-         * =====================================================
-         *
-         * The widget currently uses English for DAY and DATE.
-         *
-         * Keep locale selection behind this function so that
-         * user-selectable widget locales can be introduced in
-         * a future version without changing the rendering code.
-         */
-
         private fun getWidgetLocale(): Locale {
             return Locale.ENGLISH
         }
-
-        /*
-         * =====================================================
-         * REFERENCE DIMENSIONS
-         * =====================================================
-         */
 
         private const val REFERENCE_WIDTH_DP =
             180f
@@ -87,35 +59,17 @@ class ModernClockWidget : AppWidgetProvider() {
         private const val REFERENCE_HEIGHT_DP =
             40f
 
-        /*
-         * =====================================================
-         * DAY
-         * =====================================================
-         */
-
         private const val DAY_WIDTH_RATIO =
             0.94f
 
         private const val DEFAULT_DAY_LETTER_SPACING =
             17f
 
-        /*
-         * =====================================================
-         * FONT SIZE RANGE
-         * =====================================================
-         */
-
         private const val MIN_SIZE_PERCENT =
             50
 
         private const val MAX_SIZE_PERCENT =
             200
-
-        /*
-         * =====================================================
-         * DATE / TIME
-         * =====================================================
-         */
 
         private const val BASE_DATE_TIME_DP =
             9f
@@ -125,12 +79,6 @@ class ModernClockWidget : AppWidgetProvider() {
 
         private const val DEFAULT_COLOR =
             "#FFFFFF"
-
-        /*
-         * =====================================================
-         * TEXT SHADOW
-         * =====================================================
-         */
 
         private const val SHADOW_RADIUS_DP =
             2.5f
@@ -144,42 +92,59 @@ class ModernClockWidget : AppWidgetProvider() {
         private const val SHADOW_ALPHA =
             180
 
-        /*
-         * =====================================================
-         * FONT FITTING
-         * =====================================================
-         */
-
         private data class LayoutMeasurement(
             val totalHeight: Float,
             val availableHeight: Float
         )
-
-        /*
-         * =====================================================
-         * SHADOW CONFIGURATION
-         * =====================================================
-         *
-         * Shadow settings are kept as a small independent
-         * configuration object so DAY, DATE and TIME can each
-         * have their own enabled state and colour without
-         * duplicating shadow-rendering logic.
-         */
 
         private data class ShadowConfig(
             val enabled: Boolean,
             val color: Int
         )
 
-        /*
-         * =====================================================
-         * SHADOW CONFIG HELPERS
-         * =====================================================
-         */
+        private fun isDarkWidgetAppearance(
+            context: Context
+        ): Boolean {
+
+            return when (
+                MainActivity.getGlobalWidgetAppearance(
+                    context
+                )
+            ) {
+
+                "dark" ->
+                    true
+
+                "light" ->
+                    false
+
+                else ->
+                    (
+                            context.resources.configuration.uiMode and
+                                    Configuration.UI_MODE_NIGHT_MASK
+                            ) ==
+                            Configuration.UI_MODE_NIGHT_YES
+            }
+        }
 
         private fun getDayShadowConfig(
             context: Context
         ): ShadowConfig {
+
+            val shadowColor =
+                if (
+                    isDarkWidgetAppearance(
+                        context
+                    )
+                ) {
+                    MainActivity.getGlobalWidgetDarkDayShadowColor(
+                        context
+                    )
+                } else {
+                    MainActivity.getGlobalDayShadowColor(
+                        context
+                    )
+                }
 
             return ShadowConfig(
                 enabled =
@@ -188,9 +153,7 @@ class ModernClockWidget : AppWidgetProvider() {
                     ),
                 color =
                     parseShadowColor(
-                        MainActivity.getGlobalDayShadowColor(
-                            context
-                        )
+                        shadowColor
                     )
             )
         }
@@ -199,6 +162,21 @@ class ModernClockWidget : AppWidgetProvider() {
             context: Context
         ): ShadowConfig {
 
+            val shadowColor =
+                if (
+                    isDarkWidgetAppearance(
+                        context
+                    )
+                ) {
+                    MainActivity.getGlobalWidgetDarkDateShadowColor(
+                        context
+                    )
+                } else {
+                    MainActivity.getGlobalDateShadowColor(
+                        context
+                    )
+                }
+
             return ShadowConfig(
                 enabled =
                     MainActivity.getGlobalDateShadowEnabled(
@@ -206,9 +184,7 @@ class ModernClockWidget : AppWidgetProvider() {
                     ),
                 color =
                     parseShadowColor(
-                        MainActivity.getGlobalDateShadowColor(
-                            context
-                        )
+                        shadowColor
                     )
             )
         }
@@ -217,6 +193,21 @@ class ModernClockWidget : AppWidgetProvider() {
             context: Context
         ): ShadowConfig {
 
+            val shadowColor =
+                if (
+                    isDarkWidgetAppearance(
+                        context
+                    )
+                ) {
+                    MainActivity.getGlobalWidgetDarkTimeShadowColor(
+                        context
+                    )
+                } else {
+                    MainActivity.getGlobalTimeShadowColor(
+                        context
+                    )
+                }
+
             return ShadowConfig(
                 enabled =
                     MainActivity.getGlobalTimeShadowEnabled(
@@ -224,9 +215,7 @@ class ModernClockWidget : AppWidgetProvider() {
                     ),
                 color =
                     parseShadowColor(
-                        MainActivity.getGlobalTimeShadowColor(
-                            context
-                        )
+                        shadowColor
                     )
             )
         }
@@ -246,22 +235,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 Color.BLACK
             }
         }
-
-        /*
-         * =====================================================
-         * APPLY SHADOW
-         * =====================================================
-         *
-         * Geometry remains fixed for v1.1:
-         *
-         * Radius: 2.5dp
-         * X:      0dp
-         * Y:      1.5dp
-         * Alpha:  180
-         *
-         * The configured colour supplies RGB values while the
-         * fixed alpha is applied here.
-         */
 
         private fun applyShadow(
             paint: Paint,
@@ -303,12 +276,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 shadowColor
             )
         }
-
-        /*
-         * =====================================================
-         * SHARED FONT FITTING CALCULATION
-         * =====================================================
-         */
 
         fun calculateFittedFontSizes(
             context: Context,
@@ -404,12 +371,6 @@ class ModernClockWidget : AppWidgetProvider() {
                     .displayMetrics
                     .density
 
-            /*
-             * =================================================
-             * BASE SIZES
-             * =================================================
-             */
-
             val heightRatio =
                 max(
                     1f,
@@ -425,12 +386,6 @@ class ModernClockWidget : AppWidgetProvider() {
             val widthScale =
                 safeWidthDp /
                         REFERENCE_WIDTH_DP
-
-            /*
-             * =================================================
-             * DAY BASE SIZE
-             * =================================================
-             */
 
             val dayPaint =
                 Paint(
@@ -499,22 +454,10 @@ class ModernClockWidget : AppWidgetProvider() {
                 lowSize *
                         widthScale
 
-            /*
-             * =================================================
-             * DATE / TIME BASE SIZE
-             * =================================================
-             */
-
             val baseSecondarySize =
                 BASE_DATE_TIME_DP *
                         heightScale *
                         density
-
-            /*
-             * =================================================
-             * MEASUREMENT FUNCTION
-             * =================================================
-             */
 
             fun calculateLayout(
                 dayPercent: Int,
@@ -666,12 +609,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 )
             }
 
-            /*
-             * =================================================
-             * FIT CHECK
-             * =================================================
-             */
-
             fun fits(
                 dayPercent: Int,
                 datePercent: Int,
@@ -689,12 +626,6 @@ class ModernClockWidget : AppWidgetProvider() {
                         measurement.availableHeight
             }
 
-            /*
-             * =================================================
-             * ALREADY FITS
-             * =================================================
-             */
-
             if (
                 fits(
                     dayResult,
@@ -709,12 +640,6 @@ class ModernClockWidget : AppWidgetProvider() {
                     time = timeResult
                 )
             }
-
-            /*
-             * =================================================
-             * PRIORITIZED FITTING
-             * =================================================
-             */
 
             if (
                 changedElement != null
@@ -852,12 +777,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 }
             }
 
-            /*
-             * =================================================
-             * FALLBACK NORMALIZATION
-             * =================================================
-             */
-
             var scaleLow =
                 0.5f
 
@@ -969,12 +888,6 @@ class ModernClockWidget : AppWidgetProvider() {
             )
         }
 
-        /*
-         * =====================================================
-         * LIVE SECOND UPDATES
-         * =====================================================
-         */
-
         private val handler =
             Handler(
                 Looper.getMainLooper()
@@ -1036,20 +949,27 @@ class ModernClockWidget : AppWidgetProvider() {
                 }
             }
 
-        /*
-         * =====================================================
-         * COLOR HELPERS
-         * =====================================================
-         */
-
         private fun getDayColor(
             context: Context
         ): Int {
 
+            val color =
+                if (
+                    isDarkWidgetAppearance(
+                        context
+                    )
+                ) {
+                    MainActivity.getGlobalWidgetDarkDayColor(
+                        context
+                    )
+                } else {
+                    MainActivity.getGlobalWidgetLightDayColor(
+                        context
+                    )
+                }
+
             return parseColor(
-                MainActivity.getGlobalDayColor(
-                    context
-                )
+                color
             )
         }
 
@@ -1057,10 +977,23 @@ class ModernClockWidget : AppWidgetProvider() {
             context: Context
         ): Int {
 
+            val color =
+                if (
+                    isDarkWidgetAppearance(
+                        context
+                    )
+                ) {
+                    MainActivity.getGlobalWidgetDarkDateColor(
+                        context
+                    )
+                } else {
+                    MainActivity.getGlobalWidgetLightDateColor(
+                        context
+                    )
+                }
+
             return parseColor(
-                MainActivity.getGlobalDateColor(
-                    context
-                )
+                color
             )
         }
 
@@ -1068,10 +1001,23 @@ class ModernClockWidget : AppWidgetProvider() {
             context: Context
         ): Int {
 
+            val color =
+                if (
+                    isDarkWidgetAppearance(
+                        context
+                    )
+                ) {
+                    MainActivity.getGlobalWidgetDarkTimeColor(
+                        context
+                    )
+                } else {
+                    MainActivity.getGlobalWidgetLightTimeColor(
+                        context
+                    )
+                }
+
             return parseColor(
-                MainActivity.getGlobalTimeColor(
-                    context
-                )
+                color
             )
         }
 
@@ -1091,79 +1037,12 @@ class ModernClockWidget : AppWidgetProvider() {
             }
         }
 
-        /*
-         * =====================================================
-         * UPDATE ALL WIDGETS
-         * =====================================================
-         */
-
-        fun updateAllWidgets(
+        private fun createWidgetViews(
             context: Context,
+            widthDp: Int,
+            heightDp: Int,
             changedElement: FontSizeElement? = null
-        ) {
-
-            val appWidgetManager =
-                AppWidgetManager.getInstance(
-                    context
-                )
-
-            val componentName =
-                ComponentName(
-                    context,
-                    ModernClockWidget::class.java
-                )
-
-            val appWidgetIds =
-                appWidgetManager
-                    .getAppWidgetIds(
-                        componentName
-                    )
-
-            for (
-            appWidgetId in appWidgetIds
-            ) {
-
-                updateWidget(
-                    context,
-                    appWidgetManager,
-                    appWidgetId,
-                    changedElement
-                )
-            }
-        }
-
-        /*
-         * =====================================================
-         * UPDATE SINGLE WIDGET
-         * =====================================================
-         */
-
-        private fun updateWidget(
-            context: Context,
-            appWidgetManager: AppWidgetManager,
-            appWidgetId: Int,
-            changedElement: FontSizeElement? = null
-        ) {
-
-            val options =
-                appWidgetManager
-                    .getAppWidgetOptions(
-                        appWidgetId
-                    )
-
-            val widthDp =
-                options.getInt(
-                    AppWidgetManager
-                        .OPTION_APPWIDGET_MIN_WIDTH,
-                    REFERENCE_WIDTH_DP.toInt()
-                )
-
-            val heightDp =
-                options.getInt(
-                    AppWidgetManager
-                        .OPTION_APPWIDGET_MIN_HEIGHT,
-                    REFERENCE_HEIGHT_DP.toInt()
-                )
+        ): RemoteViews {
 
             val timeFormat =
                 MainActivity.getGlobalTimeFormat(
@@ -1260,12 +1139,17 @@ class ModernClockWidget : AppWidgetProvider() {
                 Intent(
                     context,
                     MainActivity::class.java
-                )
+                ).apply {
+                    putExtra(
+                        "opened_from_widget",
+                        true
+                    )
+                }
 
             val launchPendingIntent =
                 PendingIntent.getActivity(
                     context,
-                    appWidgetId,
+                    0,
                     launchIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT or
                             PendingIntent.FLAG_IMMUTABLE
@@ -1276,17 +1160,151 @@ class ModernClockWidget : AppWidgetProvider() {
                 launchPendingIntent
             )
 
+            return views
+        }
+
+        fun updateAllWidgets(
+            context: Context,
+            changedElement: FontSizeElement? = null
+        ) {
+
+            val appWidgetManager =
+                AppWidgetManager.getInstance(
+                    context
+                )
+
+            val componentName =
+                ComponentName(
+                    context,
+                    ModernClockWidget::class.java
+                )
+
+            val appWidgetIds =
+                appWidgetManager
+                    .getAppWidgetIds(
+                        componentName
+                    )
+
+            for (
+            appWidgetId in appWidgetIds
+            ) {
+
+                updateWidget(
+                    context,
+                    appWidgetManager,
+                    appWidgetId,
+                    changedElement
+                )
+            }
+        }
+
+        @Suppress("DEPRECATION")
+        private fun updateWidget(
+            context: Context,
+            appWidgetManager: AppWidgetManager,
+            appWidgetId: Int,
+            changedElement: FontSizeElement? = null
+        ) {
+
+            val options =
+                appWidgetManager
+                    .getAppWidgetOptions(
+                        appWidgetId
+                    )
+
+            val sizes =
+                if (Build.VERSION.SDK_INT >= 33) {
+                    options.getParcelableArrayList(
+                        AppWidgetManager
+                            .OPTION_APPWIDGET_SIZES,
+                        SizeF::class.java
+                    )
+                } else {
+                    options.getParcelableArrayList(
+                        AppWidgetManager
+                            .OPTION_APPWIDGET_SIZES
+                    )
+                }
+
+            if (
+                !sizes.isNullOrEmpty()
+            ) {
+
+                val remoteViews =
+                    mutableMapOf<SizeF, RemoteViews>()
+
+                for (
+                size in sizes
+                ) {
+
+                    val widthDp =
+                        max(
+                            1,
+                            size.width
+                                .roundToInt()
+                        )
+
+                    val heightDp =
+                        max(
+                            1,
+                            size.height
+                                .roundToInt()
+                        )
+
+                    remoteViews[
+                        SizeF(
+                            widthDp.toFloat(),
+                            heightDp.toFloat()
+                        )
+                    ] =
+                        createWidgetViews(
+                            context = context,
+                            widthDp = widthDp,
+                            heightDp = heightDp,
+                            changedElement = changedElement
+                        )
+                }
+
+                val responsiveViews =
+                    RemoteViews(
+                        remoteViews
+                    )
+
+                appWidgetManager.updateAppWidget(
+                    appWidgetId,
+                    responsiveViews
+                )
+
+                return
+            }
+
+            val widthDp =
+                options.getInt(
+                    AppWidgetManager
+                        .OPTION_APPWIDGET_MAX_WIDTH,
+                    REFERENCE_WIDTH_DP.toInt()
+                )
+
+            val heightDp =
+                options.getInt(
+                    AppWidgetManager
+                        .OPTION_APPWIDGET_MAX_HEIGHT,
+                    REFERENCE_HEIGHT_DP.toInt()
+                )
+
+            val views =
+                createWidgetViews(
+                    context = context,
+                    widthDp = widthDp,
+                    heightDp = heightDp,
+                    changedElement = changedElement
+                )
+
             appWidgetManager.updateAppWidget(
                 appWidgetId,
                 views
             )
         }
-
-        /*
-         * =====================================================
-         * PREVIEW BITMAP
-         * =====================================================
-         */
 
         fun createPreviewBitmap(
             context: Context,
@@ -1351,11 +1369,6 @@ class ModernClockWidget : AppWidgetProvider() {
                     )
             )
         }
-
-        /*
-         * =====================================================
-         * CLOCK BITMAP
-         * ===================================================== */
 
         private fun createClockBitmap(
             context: Context,
@@ -1612,12 +1625,6 @@ class ModernClockWidget : AppWidgetProvider() {
                 safeTimeSizePercent /
                         100f
 
-            /*
-             * =================================================
-             * SHADOW CONFIGURATION
-             * =================================================
-             */
-
             val dayShadow =
                 getDayShadowConfig(
                     context
@@ -1779,12 +1786,6 @@ class ModernClockWidget : AppWidgetProvider() {
             return bitmap
         }
 
-        /*
-         * =====================================================
-         * LIVE SECOND UPDATES
-         * =====================================================
-         */
-
         fun startLiveUpdates(
             context: Context
         ) {
@@ -1852,12 +1853,6 @@ class ModernClockWidget : AppWidgetProvider() {
             liveUpdateContext =
                 null
         }
-
-        /*
-         * =====================================================
-         * NEXT MINUTE UPDATE
-         * =====================================================
-         */
 
         fun scheduleNextUpdate(
             context: Context
@@ -1952,13 +1947,19 @@ class ModernClockWidget : AppWidgetProvider() {
         }
     }
 
-    /*
-     * =========================================================
-     * WIDGET LIFECYCLE
-     * =========================================================
-     */
+    override fun onReceive(
+        context: Context,
+        intent: Intent
+    ) {
+
+        super.onReceive(
+            context,
+            intent
+        )
+    }
 
     override fun onUpdate(
+
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray

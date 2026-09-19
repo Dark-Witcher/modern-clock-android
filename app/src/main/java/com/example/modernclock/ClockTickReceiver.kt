@@ -10,12 +10,14 @@ class ClockTickReceiver : BroadcastReceiver() {
         context: Context,
         intent: Intent
     ) {
+
         when (intent.action) {
 
             ModernClockWidget.ACTION_UPDATE,
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_DATE_CHANGED,
-            Intent.ACTION_TIMEZONE_CHANGED -> {
+            Intent.ACTION_TIMEZONE_CHANGED,
+            Intent.ACTION_CONFIGURATION_CHANGED -> {
 
                 ModernClockWidget.updateAllWidgets(
                     context
